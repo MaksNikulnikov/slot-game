@@ -4,11 +4,15 @@ import type { SpinOutcome } from "../../core/slot/SpinOutcome";
 import type { SlotSymbols } from "../../core/slot/Symbol";
 import type { SlotGameSession } from "../SlotGameSession";
 import { ReelsAnimator } from "../animation/ReelsAnimator";
+import type { GameAssetLoader } from "../assets/GameAssetLoader";
+import type { LoadedGameAssets } from "../assets/GameAssetLoader";
 import type { SlotLayout, SlotViewport } from "../layout/SlotLayout";
+import { LoadingScreen } from "./LoadingScreen";
 import { MainScene } from "./MainScene";
 import { fitSceneIntoViewport } from "./fitSceneIntoViewport";
 
 export type PixiSlotGameOptions = {
+  assetLoader: GameAssetLoader;
   createLayout(viewport: SlotViewport): SlotLayout;
   initialSymbols: SlotSymbols;
   session: SlotGameSession;
@@ -16,6 +20,7 @@ export type PixiSlotGameOptions = {
 
 export class PixiSlotGame {
   private readonly app = new Application();
+  private readonly loadingScreen = new LoadingScreen();
   private readonly reelsAnimator = new ReelsAnimator();
   private readonly mainScene = new MainScene({
     onSpin: () => {
@@ -25,6 +30,8 @@ export class PixiSlotGame {
   private currentSymbols: SlotSymbols;
   private currentOutcome: SpinOutcome | null = null;
   private isSpinning = false;
+  private loadingProgress = 0;
+  private loadedAssets!: LoadedGameAssets;
 
   public constructor(
     private readonly rootElement: HTMLElement,
@@ -43,31 +50,47 @@ export class PixiSlotGame {
     this.app.stage.label = "stage";
     this.rootElement.appendChild(this.app.canvas);
     this.syncViewport();
+    this.app.stage.addChild(this.loadingScreen.container);
+    this.renderLoading();
+
+    this.loadedAssets = await this.options.assetLoader.load((progress) => {
+      this.loadingProgress = progress;
+      this.renderLoading();
+    });
+
+    this.syncViewport();
+    this.loadingScreen.container.removeFromParent();
+    this.loadingScreen.destroy();
     this.app.stage.addChild(this.mainScene.container);
-    this.render();
+    this.renderMainScene();
 
     window.addEventListener("resize", this.handleResize);
   }
 
   private readonly handleResize = (): void => {
     requestAnimationFrame(() => {
-      this.render();
+      this.renderMainScene();
     });
   };
 
-  private render(): void {
-    const viewport = {
-      width: this.app.screen.width,
-      height: this.app.screen.height
-    };
+  private renderLoading(): void {
+    this.loadingScreen.render(this.getViewport(), this.loadingProgress);
+  }
+
+  private renderMainScene(): void {
+    const viewport = this.getViewport();
     const layout = this.options.createLayout(viewport);
 
     fitSceneIntoViewport(this.mainScene.container, layout.scene, viewport);
-    this.mainScene.render(layout, {
-      symbols: this.currentSymbols,
-      isSpinning: this.isSpinning,
-      outcome: this.currentOutcome
-    });
+    this.mainScene.render(
+      layout,
+      {
+        symbols: this.currentSymbols,
+        isSpinning: this.isSpinning,
+        outcome: this.currentOutcome
+      },
+      this.loadedAssets
+    );
   }
 
   private async handleSpin(): Promise<void> {
@@ -77,18 +100,25 @@ export class PixiSlotGame {
 
     this.isSpinning = true;
     this.currentOutcome = null;
-    this.render();
+    this.renderMainScene();
     this.reelsAnimator.start(this.mainScene.getReelSymbolLayers());
 
     const outcome = await this.options.session.spin();
 
     this.currentSymbols = outcome.symbols;
     this.currentOutcome = outcome;
-    this.render();
+    this.renderMainScene();
     await this.reelsAnimator.settle(this.mainScene.getReelSymbolLayers());
 
     this.isSpinning = false;
-    this.render();
+    this.renderMainScene();
+  }
+
+  private getViewport(): SlotViewport {
+    return {
+      width: this.app.screen.width,
+      height: this.app.screen.height
+    };
   }
 
   private syncViewport(): void {

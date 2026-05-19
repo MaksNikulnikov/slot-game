@@ -1,9 +1,11 @@
-import { Container, Graphics, Text } from "pixi.js";
+import { Container, Text } from "pixi.js";
 
 import type { SpinOutcome } from "../../core/slot/SpinOutcome";
 import type { SlotSymbols } from "../../core/slot/Symbol";
+import type { LoadedGameAssets } from "../assets/GameAssetLoader";
 import type { SlotLayout } from "../layout/SlotLayout";
 import { gameText } from "../text/gameText";
+import { BackgroundView } from "./BackgroundView";
 import { CharacterPlaceholderView } from "./CharacterPlaceholderView";
 import { OutcomeBannerView } from "./OutcomeBannerView";
 import { clearContainer } from "./pixiContainerUtils";
@@ -23,7 +25,7 @@ export type MainSceneOptions = {
 
 export class MainScene {
   public readonly container = new Container();
-  private readonly backgroundLayer = new Container();
+  private readonly backgroundView = new BackgroundView();
   private readonly titleLayer = new Container();
   private readonly reelsFrameView = new ReelsFrameView();
   private readonly reelsView = new ReelsView();
@@ -38,7 +40,7 @@ export class MainScene {
 
     this.container.label = "mainScene";
     this.container.addChild(
-      this.backgroundLayer,
+      this.backgroundView.container,
       this.titleLayer,
       this.characterView.container,
       this.reelsFrameView.container,
@@ -48,8 +50,12 @@ export class MainScene {
     );
   }
 
-  public render(layout: SlotLayout, state: MainSceneState): void {
-    this.addBackground(layout);
+  public render(
+    layout: SlotLayout,
+    state: MainSceneState,
+    assets: LoadedGameAssets
+  ): void {
+    this.backgroundView.render(layout, assets.backgroundTexture);
     this.addTitle(layout);
     this.characterView.render(layout.character);
     this.reelsFrameView.render(layout.reels);
@@ -60,16 +66,6 @@ export class MainScene {
 
   public getReelSymbolLayers(): readonly [Container, Container, Container] {
     return this.reelsView.getSymbolLayers();
-  }
-
-  private addBackground(layout: SlotLayout): void {
-    const background = new Graphics()
-      .rect(0, 0, layout.scene.width, layout.scene.height)
-      .fill(0x102231);
-
-    background.label = "background";
-    clearContainer(this.backgroundLayer);
-    this.backgroundLayer.addChild(background);
   }
 
   private addTitle(layout: SlotLayout): void {
