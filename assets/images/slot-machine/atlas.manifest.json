@@ -1,0 +1,16 @@
+{
+  "atlasName": "slot-machine",
+  "maxSize": 2048,
+  "resolution": 1,
+  "padding": 6,
+  "output": "public/assets/atlases",
+  "images": [
+    {
+      "name": "slot.reelsFrame",
+      "file": "reels-frame.png",
+      "scale": 0.45,
+      "trim": true,
+      "anchor": { "x": 0.5, "y": 0.5 }
+    }
+  ]
+}

@@ -8,7 +8,7 @@ type ReelViews = readonly [SlotReelView, SlotReelView, SlotReelView];
 const spinTweenDistance = 240;
 const spinTweenDurationSeconds = 10;
 const settleAdvanceByReel = [12, 17, 22] as const;
-const settleDurationByReel = [0.95, 1.2, 1.48] as const;
+const settleSymbolsPerSecond = 14;
 
 export class ReelsAnimator {
   private readonly activeTweens: gsap.core.Tween[] = [];
@@ -55,18 +55,17 @@ export class ReelsAnimator {
             };
             const minAdvance =
               settleAdvanceByReel[index] ?? settleAdvanceByReel[0];
-            const duration =
-              settleDurationByReel[index] ?? settleDurationByReel[0];
             const targetOffset = reel.getStopOffset(
               targetSymbol,
               minAdvance
             );
+            const distance = targetOffset - state.offset;
+            const duration = Math.max(0.85, distance / settleSymbolsPerSecond);
 
-            gsap.to(state, {
+            const tween = gsap.to(state, {
               offset: targetOffset,
               duration,
-              ease: "back.out(0.72)",
-              delay: index * 0.08,
+              ease: "power1.out",
               onStart: () => {
                 reel.setSpinIntensity(0.82);
               },
@@ -79,6 +78,7 @@ export class ReelsAnimator {
                 resolve();
               }
             });
+            this.activeTweens.push(tween);
           })
       )
     );

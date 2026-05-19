@@ -12,6 +12,7 @@ export type AssetProgressHandler = (progress: number) => void;
 
 export type LoadedGameAssets = {
   backgroundTexture: Texture;
+  slotReelsFrameTexture: Texture;
   slotSymbolTextures: Record<SlotSymbol, Texture>;
   spineCharacter: {
     atlasAlias: string;
@@ -57,10 +58,17 @@ export class GameAssetLoader {
       }
     );
 
+    const slotMachineAtlas = await Assets.load<Spritesheet>(
+      this.resolvePath(this.options.assets.slotMachineAtlasPath),
+      (progress) => {
+        onProgress(0.7 + progress * 0.15);
+      }
+    );
+
     const slotSymbolAtlas = await Assets.load<Spritesheet>(
       this.resolvePath(this.options.assets.slotSymbolAtlasPath),
       (progress) => {
-        onProgress(0.7 + progress * 0.3);
+        onProgress(0.85 + progress * 0.15);
       }
     );
 
@@ -68,6 +76,10 @@ export class GameAssetLoader {
 
     return {
       backgroundTexture,
+      slotReelsFrameTexture: this.resolveTexture(
+        slotMachineAtlas,
+        this.options.assets.slotReelsFrameTextureName
+      ),
       slotSymbolTextures: this.resolveSlotSymbolTextures(slotSymbolAtlas),
       spineCharacter: {
         atlasAlias: spineCharacter.atlasAlias,
@@ -87,15 +99,19 @@ export class GameAssetLoader {
 
     slotSymbols.forEach((symbol) => {
       const textureName = this.options.assets.slotSymbolTextureNames[symbol];
-      const texture = atlas.textures[textureName];
-
-      if (texture === undefined) {
-        throw new Error(`Slot symbol texture "${textureName}" was not loaded`);
-      }
-
-      textures[symbol] = texture;
+      textures[symbol] = this.resolveTexture(atlas, textureName);
     });
 
     return textures;
+  }
+
+  private resolveTexture(atlas: Spritesheet, textureName: string): Texture {
+    const texture = atlas.textures[textureName];
+
+    if (texture === undefined) {
+      throw new Error(`Texture "${textureName}" was not loaded`);
+    }
+
+    return texture;
   }
 }

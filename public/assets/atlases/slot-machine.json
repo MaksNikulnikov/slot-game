@@ -1,0 +1,39 @@
+{
+  "frames": {
+    "slot.reelsFrame": {
+      "frame": {
+        "x": 6,
+        "y": 6,
+        "w": 680,
+        "h": 320
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 680,
+        "h": 320
+      },
+      "sourceSize": {
+        "w": 680,
+        "h": 320
+      },
+      "anchor": {
+        "x": 0.5,
+        "y": 0.5
+      }
+    }
+  },
+  "meta": {
+    "app": "pixi-slot-game/scripts/build-atlases",
+    "version": "1.0",
+    "image": "slot-machine.png",
+    "format": "RGBA8888",
+    "size": {
+      "w": 692,
+      "h": 332
+    },
+    "scale": "1"
+  }
+}

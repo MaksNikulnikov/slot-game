@@ -193,24 +193,6 @@ export class SlotReelView {
         color: 0xffffff,
         alpha: 0.2
       });
-    const topShadow = new Graphics()
-      .roundRect(0, 0, layout.width, layout.height * 0.32, 28)
-      .fill({
-        color: 0x000000,
-        alpha: 0.22
-      });
-    const bottomShadow = new Graphics()
-      .roundRect(
-        0,
-        layout.height * 0.68,
-        layout.width,
-        layout.height * 0.32,
-        28
-      )
-      .fill({
-        color: 0x000000,
-        alpha: 0.24
-      });
     const paylineGlow = new Graphics()
       .roundRect(10, layout.height / 2 - 54, layout.width - 20, 108, 26)
       .stroke({
@@ -224,9 +206,7 @@ export class SlotReelView {
       background,
       centerSheen,
       innerShade,
-      paylineGlow,
-      topShadow,
-      bottomShadow
+      paylineGlow
     );
   }
 

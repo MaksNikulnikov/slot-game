@@ -10,6 +10,7 @@ import { OutcomeBannerView } from "./OutcomeBannerView";
 import { clearContainer } from "./pixiContainerUtils";
 import { MuteButtonView } from "./MuteButtonView";
 import { ReelsFrameView } from "./ReelsFrameView";
+import { ReelsShadowView } from "./ReelsShadowView";
 import { ReelsView } from "./ReelsView";
 import type { SlotReelView } from "./SlotReelView";
 import { SpineCharacterView } from "./SpineCharacterView";
@@ -34,8 +35,9 @@ export class MainScene {
   private readonly assets: LoadedGameAssets;
   private readonly backgroundView = new BackgroundView();
   private readonly titleLayer = new Container();
-  private readonly reelsFrameView = new ReelsFrameView();
+  private readonly reelsFrameView: ReelsFrameView;
   private readonly reelsView: ReelsView;
+  private readonly reelsShadowView = new ReelsShadowView();
   private readonly winLineView = new WinLineView();
   private readonly muteButtonView: MuteButtonView;
   private readonly spinButtonView: SpinButtonView;
@@ -45,6 +47,9 @@ export class MainScene {
   public constructor(options: MainSceneOptions) {
     this.assets = options.assets;
     this.characterView = new SpineCharacterView(options.assets.spineCharacter);
+    this.reelsFrameView = new ReelsFrameView(
+      options.assets.slotReelsFrameTexture
+    );
     this.reelsView = new ReelsView(options.assets.slotSymbolTextures);
     this.muteButtonView = new MuteButtonView({
       onTap: options.onToggleSound
@@ -58,9 +63,10 @@ export class MainScene {
       this.backgroundView.container,
       this.titleLayer,
       this.characterView.container,
-      this.reelsFrameView.container,
       this.reelsView.container,
       this.winLineView.container,
+      this.reelsShadowView.container,
+      this.reelsFrameView.container,
       this.outcomeBannerView.container,
       this.muteButtonView.container,
       this.spinButtonView.container
@@ -71,9 +77,10 @@ export class MainScene {
     this.backgroundView.render(layout, this.assets.backgroundTexture);
     this.addTitle(layout);
     this.characterView.render(layout.character, this.getCharacterMood(state));
-    this.reelsFrameView.render(layout.reels);
     this.reelsView.render(layout.reels, state.symbols, state.isSpinning);
     this.winLineView.render(layout.reels, state.outcome?.isWin === true);
+    this.reelsShadowView.render(layout.reels);
+    this.reelsFrameView.render(layout.reels);
     this.outcomeBannerView.render(layout.outcomeBanner, state.outcome);
     this.muteButtonView.render(layout.muteButton, state.isMuted);
     this.spinButtonView.render(layout.spinButton, !state.isSpinning);
