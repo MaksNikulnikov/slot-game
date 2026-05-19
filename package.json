@@ -9,6 +9,7 @@
     "prebuild": "npm run assets:atlas",
     "build": "tsc --noEmit && webpack --mode production",
     "check": "tsc --noEmit",
+    "lint": "eslint .",
     "test": "vitest run"
   },
   "dependencies": {
@@ -17,13 +18,16 @@
     "pixi.js": "^8.18.1"
   },
   "devDependencies": {
+    "@eslint/js": "^10.0.1",
     "@types/node": "^22.0.0",
-    "copy-webpack-plugin": "^12.0.0",
+    "copy-webpack-plugin": "^14.0.0",
     "css-loader": "^7.0.0",
+    "eslint": "^10.4.0",
     "html-webpack-plugin": "^5.0.0",
     "style-loader": "^4.0.0",
     "ts-loader": "^9.0.0",
     "typescript": "^5.0.0",
+    "typescript-eslint": "^8.59.4",
     "vitest": "^4.0.0",
     "webpack": "^5.0.0",
     "webpack-cli": "^5.0.0",

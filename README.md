@@ -70,3 +70,20 @@ docker run --rm -p 8080:80 pixi-slot-game
 ```
 
 Open `http://localhost:8080`.
+
+Docker is also checked in GitHub Actions by building the image on an Ubuntu
+runner. I did not verify Docker locally because Docker is not available on my
+current machine.
+
+## Review Notes
+
+- Time spent: approximately 6 hours.
+- The code is split into `core` and `presentation` layers. The slot rules and
+  mock server contracts do not depend on Pixi, GSAP, Spine, DOM, or audio APIs.
+- This boundary makes it easier to swap the rendering engine later, for example
+  from Pixi.js to Phaser, without rewriting the slot logic.
+- The same boundary makes the game rules straightforward to unit test. I kept
+  tests focused on the core logic because broader visual/e2e coverage was not
+  required by the task and would add extra complexity.
+- ESLint enforces that Pixi and Spine-Pixi imports stay out of `src/core` and
+  `src/app`.

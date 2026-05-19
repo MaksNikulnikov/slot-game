@@ -1,9 +1,9 @@
-import type { SlotLayout, SlotViewport } from "./SlotLayout";
+import type { SlotLayout } from "./SlotLayout";
 
 const sceneWidth = 1280;
 const sceneHeight = 720;
 
-export function createSlotLayout(_viewport: SlotViewport): SlotLayout {
+export function createSlotLayout(): SlotLayout {
   const reelsFrame = {
     x: 285,
     y: 145,

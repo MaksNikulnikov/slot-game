@@ -23,17 +23,20 @@ export class ReelsFrameView {
           alpha: 0.58
         }),
       new Graphics()
+        .roundRect(frame.x - 6, frame.y - 6, frame.width + 12, frame.height + 12, 42)
+        .fill(0x8a4c12),
+      new Graphics()
         .roundRect(frame.x, frame.y, frame.width, frame.height, 38)
-        .fill(0x15283b)
+        .fill(0x2a1708)
         .stroke({
-          color: 0xf3c86a,
-          width: 9
+          color: 0xffd36a,
+          width: 12
         }),
       new Graphics()
         .roundRect(frame.x + 12, frame.y + 12, frame.width - 24, frame.height - 24, 30)
         .stroke({
           color: 0xffffff,
-          alpha: 0.12,
+          alpha: 0.16,
           width: 3
         }),
       new Graphics()

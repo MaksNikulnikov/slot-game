@@ -175,23 +175,29 @@ export class SlotReelView {
   private renderChrome(layout: RectLayout): void {
     const background = new Graphics()
       .roundRect(0, 0, layout.width, layout.height, 28)
-      .fill(0x081521)
+      .fill(0xf5efe1)
       .stroke({
-        color: 0x2c5c76,
-        width: 3
+        color: 0xffd980,
+        width: 4
       });
     const innerShade = new Graphics()
       .roundRect(8, 8, layout.width - 16, layout.height - 16, 22)
       .stroke({
-        color: 0xffffff,
-        alpha: 0.08,
+        color: 0x8f6a2a,
+        alpha: 0.2,
         width: 3
+      });
+    const centerSheen = new Graphics()
+      .roundRect(12, layout.height / 2 - 66, layout.width - 24, 132, 28)
+      .fill({
+        color: 0xffffff,
+        alpha: 0.2
       });
     const topShadow = new Graphics()
       .roundRect(0, 0, layout.width, layout.height * 0.32, 28)
       .fill({
         color: 0x000000,
-        alpha: 0.34
+        alpha: 0.22
       });
     const bottomShadow = new Graphics()
       .roundRect(
@@ -203,19 +209,20 @@ export class SlotReelView {
       )
       .fill({
         color: 0x000000,
-        alpha: 0.32
+        alpha: 0.24
       });
     const paylineGlow = new Graphics()
       .roundRect(10, layout.height / 2 - 54, layout.width - 20, 108, 26)
       .stroke({
-        color: 0xf9d778,
-        alpha: 0.5,
-        width: 3
+        color: 0xffcc4d,
+        alpha: 0.26,
+        width: 4
       });
 
     clearContainer(this.chromeLayer);
     this.chromeLayer.addChild(
       background,
+      centerSheen,
       innerShade,
       paylineGlow,
       topShadow,
@@ -234,14 +241,14 @@ export class SlotReelView {
       .roundRect(0, 0, layout.width, layout.height, 24)
       .stroke({
         color: 0x000000,
-        alpha: 0.3,
-        width: 12
+        alpha: 0.2,
+        width: 16
       });
     const centerGlow = new Graphics()
       .roundRect(14, layout.height / 2 - 60, layout.width - 28, 120, 32)
       .stroke({
-        color: 0xf7e4a6,
-        alpha: 0.12,
+        color: 0xffffff,
+        alpha: 0.24,
         width: 5
       });
 
