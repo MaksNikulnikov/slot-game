@@ -11,7 +11,7 @@ A small HTML5 slot game built with Pixi.js, TypeScript, Webpack, GSAP, and Spine
 - GSAP reel spin and staggered settle animation with masked reel strips.
 - Spine character that switches visual states for idle, win, and lose outcomes.
 - Background Web Audio loop, win sound, and mute toggle.
-- Source PNG symbol pipeline that builds a Pixi spritesheet from atlas manifests.
+- Source PNG asset pipeline that builds Pixi spritesheets from atlas manifests.
 
 ## Run Locally
 
@@ -54,7 +54,15 @@ The Pixi layer calls the slot through `SlotGameSession`. Core code does not impo
 
 ## Assets
 
-Slot symbol source PNGs live in `assets/images/slot-symbols` with an `atlas.manifest.json` next to them. Run `npm run assets:atlas` to generate `public/assets/atlases/slot-symbols.json` and `slot-symbols.png`; the command is also wired into `predev` and `prebuild`.
+Slot source PNGs live under `assets/images/**` with an `atlas.manifest.json`
+next to each atlas group. Run `npm run assets:atlas` to generate runtime
+spritesheets in `public/assets/atlases`; the command is also wired into
+`predev` and `prebuild`.
+
+In a production project I would also pass final PNG atlases through a quantizer
+such as `pngquant` or `oxipng`. This often reduces PNG size by 3x or more, but
+I would keep that as a deliberate visual-review step because compression
+artifacts are easy to miss in gradients, glow effects, and transparent edges.
 
 See `docs/asset-atlas-pipeline.md` for the manifest format and runtime loading notes.
 
@@ -71,11 +79,10 @@ docker run --rm -p 8080:80 pixi-slot-game
 
 Open `http://localhost:8080`.
 
-Docker is also checked in GitHub Actions on an Ubuntu runner. The workflow
-builds the image, starts the nginx container, and smoke-tests that the playable
-HTML, JS bundle, atlases, background, and Spine assets are served successfully.
-I did not verify Docker locally because Docker is not available on my current
-machine.
+Docker is verified in GitHub Actions on an Ubuntu runner because Docker is not
+available on my current local machine. The workflow builds the image, starts the
+nginx container, and smoke-tests that the playable HTML, JS bundle, atlases,
+background, and Spine assets are served successfully.
 
 ## Review Notes
 
