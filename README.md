@@ -1,0 +1,66 @@
+# Pixi Slot Game
+
+A small HTML5 slot game built with Pixi.js, TypeScript, Webpack, GSAP, and Spine.
+
+## Features
+
+- Preload screen with a real asset-loading progress bar.
+- Main slot scene with background image, reels frame, three reels, three symbols, and spin button.
+- Mock server spin response with randomized symbols.
+- Win detection for three equal symbols.
+- GSAP reel spin and settle animation.
+- Spine character that switches visual states for idle, win, and lose outcomes.
+- Background Web Audio loop, win sound, and mute toggle.
+
+## Run Locally
+
+```bash
+npm install
+npm run dev
+```
+
+Open `http://localhost:5173`.
+
+## Scripts
+
+```bash
+npm run check
+npm run test
+npm run build
+```
+
+`npm run build` creates the production bundle in `dist`.
+
+## Architecture
+
+The project keeps the game rules away from Pixi and browser APIs.
+
+```text
+src/
+  app/                 composition root
+  core/                slot model, win evaluation, mock server contracts
+  presentation/
+    animation/         GSAP animation adapters
+    assets/            asset manifest and Pixi asset loader
+    audio/             Web Audio controller
+    layout/            screen layout data
+    pixi/              Pixi views and scene orchestration
+    text/              UI copy
+```
+
+The Pixi layer calls the slot through `SlotGameSession`. Core code does not import Pixi, GSAP, Spine, DOM, or audio APIs.
+
+## Assets
+
+The Spineboy asset is copied from the official Spine Runtimes 4.2 examples and kept locally under `public/assets/spine`. Its original license is included as `spineboy-license.txt`.
+
+Spine runtime is provided by `@esotericsoftware/spine-pixi-v8`; see the package license terms before redistributing a production build.
+
+## Docker
+
+```bash
+docker build -t pixi-slot-game .
+docker run --rm -p 8080:80 pixi-slot-game
+```
+
+Open `http://localhost:8080`.
