@@ -37,7 +37,7 @@ jobs:
         run: npm run build
 
   docker:
-    name: Build Docker image
+    name: Build and smoke test Docker image
     runs-on: ubuntu-latest
 
     steps:
@@ -46,3 +46,43 @@ jobs:
 
       - name: Build image
         run: docker build -t pixi-slot-game .
+
+      - name: Smoke test playable container
+        run: |
+          set -euo pipefail
+
+          docker run --detach --rm --name pixi-slot-game-ci --publish 8080:80 pixi-slot-game
+
+          cleanup() {
+            docker logs pixi-slot-game-ci || true
+            docker stop pixi-slot-game-ci || true
+          }
+          trap cleanup EXIT
+
+          for attempt in {1..30}; do
+            if curl --fail --silent --show-error http://127.0.0.1:8080/ --output /tmp/index.html; then
+              break
+            fi
+
+            if [ "$attempt" -eq 30 ]; then
+              echo "Playable container did not become ready in time."
+              exit 1
+            fi
+
+            sleep 1
+          done
+
+          grep --quiet "Pixi Slot Game" /tmp/index.html
+
+          main_bundle="$(grep --only-matching --extended-regexp 'assets/main\.[^"]+\.js' /tmp/index.html | head --lines 1)"
+          test -n "$main_bundle"
+
+          curl --fail --silent --show-error "http://127.0.0.1:8080/${main_bundle}" --output /tmp/main.js
+          curl --fail --silent --show-error http://127.0.0.1:8080/assets/background.svg --output /tmp/background.svg
+          curl --fail --silent --show-error http://127.0.0.1:8080/assets/atlases/slot-symbols.json --output /tmp/slot-symbols.json
+          curl --fail --silent --show-error http://127.0.0.1:8080/assets/atlases/slot-symbols.png --output /tmp/slot-symbols.png
+          curl --fail --silent --show-error http://127.0.0.1:8080/assets/atlases/slot-machine.json --output /tmp/slot-machine.json
+          curl --fail --silent --show-error http://127.0.0.1:8080/assets/atlases/slot-machine.png --output /tmp/slot-machine.png
+          curl --fail --silent --show-error http://127.0.0.1:8080/assets/spine/spineboy-pro.skel --output /tmp/spineboy-pro.skel
+          curl --fail --silent --show-error http://127.0.0.1:8080/assets/spine/spineboy-pma.atlas --output /tmp/spineboy-pma.atlas
+          curl --fail --silent --show-error http://127.0.0.1:8080/assets/spine/spineboy-pma.png --output /tmp/spineboy-pma.png

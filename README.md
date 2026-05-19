@@ -71,9 +71,11 @@ docker run --rm -p 8080:80 pixi-slot-game
 
 Open `http://localhost:8080`.
 
-Docker is also checked in GitHub Actions by building the image on an Ubuntu
-runner. I did not verify Docker locally because Docker is not available on my
-current machine.
+Docker is also checked in GitHub Actions on an Ubuntu runner. The workflow
+builds the image, starts the nginx container, and smoke-tests that the playable
+HTML, JS bundle, atlases, background, and Spine assets are served successfully.
+I did not verify Docker locally because Docker is not available on my current
+machine.
 
 ## Review Notes
 
