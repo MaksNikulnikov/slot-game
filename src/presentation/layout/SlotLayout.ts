@@ -21,8 +21,12 @@ export type SlotLayout = {
     height: number;
   };
   title: PointLayout;
-  reelsFrame: RectLayout;
+  reels: {
+    frame: RectLayout;
+    cells: readonly [RectLayout, RectLayout, RectLayout];
+  };
   spinButton: RectLayout;
   muteButton: RectLayout;
   character: RectLayout;
+  outcomeBanner: RectLayout;
 };

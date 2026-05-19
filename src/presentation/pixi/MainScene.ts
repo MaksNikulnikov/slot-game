@@ -1,22 +1,61 @@
 import { Container, Graphics, Text } from "pixi.js";
 
+import type { SpinOutcome } from "../../core/slot/SpinOutcome";
+import type { SlotSymbols } from "../../core/slot/Symbol";
 import type { SlotLayout } from "../layout/SlotLayout";
 import { gameText } from "../text/gameText";
+import { CharacterPlaceholderView } from "./CharacterPlaceholderView";
+import { OutcomeBannerView } from "./OutcomeBannerView";
+import { clearContainer } from "./pixiContainerUtils";
+import { ReelsFrameView } from "./ReelsFrameView";
+import { ReelsView } from "./ReelsView";
+import { SpinButtonView } from "./SpinButtonView";
+
+export type MainSceneState = {
+  symbols: SlotSymbols;
+  isSpinning: boolean;
+  outcome: SpinOutcome | null;
+};
+
+export type MainSceneOptions = {
+  onSpin(): void;
+};
 
 export class MainScene {
   public readonly container = new Container();
+  private readonly backgroundLayer = new Container();
+  private readonly titleLayer = new Container();
+  private readonly reelsFrameView = new ReelsFrameView();
+  private readonly reelsView = new ReelsView();
+  private readonly spinButtonView: SpinButtonView;
+  private readonly outcomeBannerView = new OutcomeBannerView();
+  private readonly characterView = new CharacterPlaceholderView();
 
-  public render(layout: SlotLayout): void {
-    this.container.removeChildren().forEach((child) => {
-      child.destroy({ children: true });
+  public constructor(options: MainSceneOptions) {
+    this.spinButtonView = new SpinButtonView({
+      onTap: options.onSpin
     });
 
+    this.container.label = "mainScene";
+    this.container.addChild(
+      this.backgroundLayer,
+      this.titleLayer,
+      this.characterView.container,
+      this.reelsFrameView.container,
+      this.reelsView.container,
+      this.outcomeBannerView.container,
+      this.spinButtonView.container
+    );
+  }
+
+  public render(layout: SlotLayout, state: MainSceneState): void {
     this.addBackground(layout);
     this.addTitle(layout);
-    this.addReelsFrame(layout);
-    this.addSpinButton(layout);
-    this.addMuteButton(layout);
-    this.addCharacterPlaceholder(layout);
+    this.characterView.render(layout.character);
+    this.reelsFrameView.render(layout.reels);
+    this.reelsView.render(layout.reels, state.symbols);
+    this.outcomeBannerView.render(layout.outcomeBanner, state.outcome);
+    this.spinButtonView.render(layout.spinButton, !state.isSpinning);
   }
 
   private addBackground(layout: SlotLayout): void {
@@ -25,7 +64,8 @@ export class MainScene {
       .fill(0x102231);
 
     background.label = "background";
-    this.container.addChild(background);
+    clearContainer(this.backgroundLayer);
+    this.backgroundLayer.addChild(background);
   }
 
   private addTitle(layout: SlotLayout): void {
@@ -42,104 +82,7 @@ export class MainScene {
     title.anchor.set(0.5);
     title.position.set(layout.title.x, layout.title.y);
     title.label = "title";
-    this.container.addChild(title);
-  }
-
-  private addReelsFrame(layout: SlotLayout): void {
-    const frame = new Graphics()
-      .roundRect(
-        layout.reelsFrame.x,
-        layout.reelsFrame.y,
-        layout.reelsFrame.width,
-        layout.reelsFrame.height,
-        28
-      )
-      .fill(0x22384f)
-      .stroke({
-        color: 0xf3c86a,
-        width: 8
-      });
-
-    frame.label = "reelsFrame";
-    this.container.addChild(frame);
-  }
-
-  private addSpinButton(layout: SlotLayout): void {
-    const button = new Graphics()
-      .roundRect(
-        layout.spinButton.x,
-        layout.spinButton.y,
-        layout.spinButton.width,
-        layout.spinButton.height,
-        18
-      )
-      .fill(0xd94f36);
-
-    const label = new Text({
-      text: gameText.spin,
-      style: {
-        fill: "#ffffff",
-        fontFamily: "Trebuchet MS, Segoe UI, sans-serif",
-        fontSize: 32,
-        fontWeight: "700"
-      }
-    });
-
-    label.anchor.set(0.5);
-    label.position.set(
-      layout.spinButton.x + layout.spinButton.width / 2,
-      layout.spinButton.y + layout.spinButton.height / 2
-    );
-    button.label = "spinButton";
-    label.label = "spinButtonLabel";
-    this.container.addChild(button, label);
-  }
-
-  private addMuteButton(layout: SlotLayout): void {
-    const button = new Graphics()
-      .circle(
-        layout.muteButton.x + layout.muteButton.width / 2,
-        layout.muteButton.y + layout.muteButton.height / 2,
-        layout.muteButton.width / 2
-      )
-      .fill(0x315a73);
-
-    const label = new Text({
-      text: gameText.soundOn,
-      style: {
-        fill: "#ffffff",
-        fontFamily: "Trebuchet MS, Segoe UI, sans-serif",
-        fontSize: 28,
-        fontWeight: "700"
-      }
-    });
-
-    label.anchor.set(0.5);
-    label.position.set(
-      layout.muteButton.x + layout.muteButton.width / 2,
-      layout.muteButton.y + layout.muteButton.height / 2
-    );
-    button.label = "muteButton";
-    label.label = "muteButtonLabel";
-    this.container.addChild(button, label);
-  }
-
-  private addCharacterPlaceholder(layout: SlotLayout): void {
-    const character = new Graphics()
-      .roundRect(
-        layout.character.x,
-        layout.character.y,
-        layout.character.width,
-        layout.character.height,
-        24
-      )
-      .fill(0x4f6b45)
-      .stroke({
-        color: 0x9ccc79,
-        width: 5
-      });
-
-    character.label = "characterPlaceholder";
-    this.container.addChild(character);
+    clearContainer(this.titleLayer);
+    this.titleLayer.addChild(title);
   }
 }
