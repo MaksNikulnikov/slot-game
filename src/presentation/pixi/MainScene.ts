@@ -58,6 +58,10 @@ export class MainScene {
     this.spinButtonView.render(layout.spinButton, !state.isSpinning);
   }
 
+  public getReelSymbolLayers(): readonly [Container, Container, Container] {
+    return this.reelsView.getSymbolLayers();
+  }
+
   private addBackground(layout: SlotLayout): void {
     const background = new Graphics()
       .rect(0, 0, layout.scene.width, layout.scene.height)

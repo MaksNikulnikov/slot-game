@@ -3,6 +3,7 @@ import { Application } from "pixi.js";
 import type { SpinOutcome } from "../../core/slot/SpinOutcome";
 import type { SlotSymbols } from "../../core/slot/Symbol";
 import type { SlotGameSession } from "../SlotGameSession";
+import { ReelsAnimator } from "../animation/ReelsAnimator";
 import type { SlotLayout, SlotViewport } from "../layout/SlotLayout";
 import { MainScene } from "./MainScene";
 import { fitSceneIntoViewport } from "./fitSceneIntoViewport";
@@ -15,6 +16,7 @@ export type PixiSlotGameOptions = {
 
 export class PixiSlotGame {
   private readonly app = new Application();
+  private readonly reelsAnimator = new ReelsAnimator();
   private readonly mainScene = new MainScene({
     onSpin: () => {
       void this.handleSpin();
@@ -76,11 +78,15 @@ export class PixiSlotGame {
     this.isSpinning = true;
     this.currentOutcome = null;
     this.render();
+    this.reelsAnimator.start(this.mainScene.getReelSymbolLayers());
 
     const outcome = await this.options.session.spin();
 
     this.currentSymbols = outcome.symbols;
     this.currentOutcome = outcome;
+    this.render();
+    await this.reelsAnimator.settle(this.mainScene.getReelSymbolLayers());
+
     this.isSpinning = false;
     this.render();
   }
