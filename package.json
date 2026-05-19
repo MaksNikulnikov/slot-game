@@ -9,6 +9,7 @@
     "test": "vitest run"
   },
   "dependencies": {
+    "@esotericsoftware/spine-pixi-v8": "4.2.117",
     "gsap": "^3.13.0",
     "pixi.js": "^8.18.1"
   },

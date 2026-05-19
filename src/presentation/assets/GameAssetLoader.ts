@@ -1,3 +1,5 @@
+import "@esotericsoftware/spine-pixi-v8";
+
 import { Assets } from "pixi.js";
 import type { Texture } from "pixi.js";
 
@@ -7,6 +9,10 @@ export type AssetProgressHandler = (progress: number) => void;
 
 export type LoadedGameAssets = {
   backgroundTexture: Texture;
+  spineCharacter: {
+    atlasAlias: string;
+    skeletonAlias: string;
+  };
 };
 
 export type GameAssetLoaderOptions = {
@@ -20,15 +26,41 @@ export class GameAssetLoader {
   public async load(
     onProgress: AssetProgressHandler
   ): Promise<LoadedGameAssets> {
+    const spineCharacter = this.options.assets.spineCharacter;
+
+    Assets.add([
+      {
+        alias: spineCharacter.skeletonAlias,
+        src: this.resolvePath(spineCharacter.skeletonPath)
+      },
+      {
+        alias: spineCharacter.atlasAlias,
+        src: this.resolvePath(spineCharacter.atlasPath)
+      }
+    ]);
+
     const backgroundTexture = await Assets.load<Texture>(
       this.resolvePath(this.options.assets.backgroundPath),
-      onProgress
+      (progress) => {
+        onProgress(progress * 0.4);
+      }
+    );
+
+    await Assets.load(
+      [spineCharacter.skeletonAlias, spineCharacter.atlasAlias],
+      (progress) => {
+        onProgress(0.4 + progress * 0.6);
+      }
     );
 
     onProgress(1);
 
     return {
-      backgroundTexture
+      backgroundTexture,
+      spineCharacter: {
+        atlasAlias: spineCharacter.atlasAlias,
+        skeletonAlias: spineCharacter.skeletonAlias
+      }
     };
   }
 

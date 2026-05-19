@@ -22,11 +22,7 @@ export class PixiSlotGame {
   private readonly app = new Application();
   private readonly loadingScreen = new LoadingScreen();
   private readonly reelsAnimator = new ReelsAnimator();
-  private readonly mainScene = new MainScene({
-    onSpin: () => {
-      void this.handleSpin();
-    }
-  });
+  private mainScene!: MainScene;
   private currentSymbols: SlotSymbols;
   private currentOutcome: SpinOutcome | null = null;
   private isSpinning = false;
@@ -61,6 +57,12 @@ export class PixiSlotGame {
     this.syncViewport();
     this.loadingScreen.container.removeFromParent();
     this.loadingScreen.destroy();
+    this.mainScene = new MainScene({
+      assets: this.loadedAssets,
+      onSpin: () => {
+        void this.handleSpin();
+      }
+    });
     this.app.stage.addChild(this.mainScene.container);
     this.renderMainScene();
 
@@ -88,8 +90,7 @@ export class PixiSlotGame {
         symbols: this.currentSymbols,
         isSpinning: this.isSpinning,
         outcome: this.currentOutcome
-      },
-      this.loadedAssets
+      }
     );
   }
 

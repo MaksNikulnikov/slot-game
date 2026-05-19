@@ -6,11 +6,11 @@ import type { LoadedGameAssets } from "../assets/GameAssetLoader";
 import type { SlotLayout } from "../layout/SlotLayout";
 import { gameText } from "../text/gameText";
 import { BackgroundView } from "./BackgroundView";
-import { CharacterPlaceholderView } from "./CharacterPlaceholderView";
 import { OutcomeBannerView } from "./OutcomeBannerView";
 import { clearContainer } from "./pixiContainerUtils";
 import { ReelsFrameView } from "./ReelsFrameView";
 import { ReelsView } from "./ReelsView";
+import { SpineCharacterView } from "./SpineCharacterView";
 import { SpinButtonView } from "./SpinButtonView";
 
 export type MainSceneState = {
@@ -20,20 +20,24 @@ export type MainSceneState = {
 };
 
 export type MainSceneOptions = {
+  assets: LoadedGameAssets;
   onSpin(): void;
 };
 
 export class MainScene {
   public readonly container = new Container();
+  private readonly assets: LoadedGameAssets;
   private readonly backgroundView = new BackgroundView();
   private readonly titleLayer = new Container();
   private readonly reelsFrameView = new ReelsFrameView();
   private readonly reelsView = new ReelsView();
   private readonly spinButtonView: SpinButtonView;
   private readonly outcomeBannerView = new OutcomeBannerView();
-  private readonly characterView = new CharacterPlaceholderView();
+  private readonly characterView: SpineCharacterView;
 
   public constructor(options: MainSceneOptions) {
+    this.assets = options.assets;
+    this.characterView = new SpineCharacterView(options.assets.spineCharacter);
     this.spinButtonView = new SpinButtonView({
       onTap: options.onSpin
     });
@@ -50,14 +54,10 @@ export class MainScene {
     );
   }
 
-  public render(
-    layout: SlotLayout,
-    state: MainSceneState,
-    assets: LoadedGameAssets
-  ): void {
-    this.backgroundView.render(layout, assets.backgroundTexture);
+  public render(layout: SlotLayout, state: MainSceneState): void {
+    this.backgroundView.render(layout, this.assets.backgroundTexture);
     this.addTitle(layout);
-    this.characterView.render(layout.character);
+    this.characterView.render(layout.character, this.getCharacterMood(state));
     this.reelsFrameView.render(layout.reels);
     this.reelsView.render(layout.reels, state.symbols);
     this.outcomeBannerView.render(layout.outcomeBanner, state.outcome);
@@ -84,5 +84,13 @@ export class MainScene {
     title.label = "title";
     clearContainer(this.titleLayer);
     this.titleLayer.addChild(title);
+  }
+
+  private getCharacterMood(state: MainSceneState): "idle" | "win" | "lose" {
+    if (state.outcome === null) {
+      return "idle";
+    }
+
+    return state.outcome.isWin ? "win" : "lose";
   }
 }
