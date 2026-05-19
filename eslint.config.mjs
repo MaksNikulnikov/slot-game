@@ -4,6 +4,7 @@ import tseslint from "typescript-eslint";
 const browserGlobals = {
   AudioContext: "readonly",
   document: "readonly",
+  fetch: "readonly",
   HTMLElement: "readonly",
   requestAnimationFrame: "readonly",
   setTimeout: "readonly",

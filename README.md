@@ -10,7 +10,7 @@ A small HTML5 slot game built with Pixi.js, TypeScript, Webpack, GSAP, and Spine
 - Win detection for three equal symbols.
 - GSAP reel spin and staggered settle animation with masked reel strips.
 - Spine character that switches visual states for idle, win, and lose outcomes.
-- Background Web Audio loop, win sound, and mute toggle.
+- Audio-file background loop, win sound, UI click, and mute toggle.
 - Source PNG asset pipeline that builds Pixi spritesheets from atlas manifests.
 
 ## Run Locally
@@ -64,6 +64,10 @@ such as `pngquant` or `oxipng`. This often reduces PNG size by 3x or more, but
 I would keep that as a deliberate visual-review step because compression
 artifacts are easy to miss in gradients, glow effects, and transparent edges.
 
+Runtime audio files live under `public/assets/audio` and are decoded through the
+Web Audio API during the loading screen. The game uses a looping background
+track, a win sound, and a small UI click.
+
 See `docs/asset-atlas-pipeline.md` for the manifest format and runtime loading notes.
 
 The Spineboy asset is copied from the official Spine Runtimes 4.2 examples and kept locally under `public/assets/spine`. Its original license is included as `spineboy-license.txt`.
@@ -82,7 +86,7 @@ Open `http://localhost:8080`.
 Docker is verified in GitHub Actions on an Ubuntu runner because Docker is not
 available on my current local machine. The workflow builds the image, starts the
 nginx container, and smoke-tests that the playable HTML, JS bundle, atlases,
-background, and Spine assets are served successfully.
+background, audio, and Spine assets are served successfully.
 
 ## Review Notes
 

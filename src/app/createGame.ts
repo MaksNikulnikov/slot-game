@@ -23,7 +23,10 @@ export async function createGame(): Promise<void> {
       assets: gameAssets,
       baseUrl: ""
     }),
-    audio: new AudioController(),
+    audio: new AudioController({
+      assets: gameAssets.audio,
+      baseUrl: ""
+    }),
     createLayout: createSlotLayout,
     initialSymbols: ["cherry", "lemon", "seven"],
     session

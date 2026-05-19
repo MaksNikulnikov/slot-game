@@ -1,6 +1,11 @@
 import type { SlotSymbol } from "../../core/slot/Symbol";
 
 export type GameAssets = {
+  audio: {
+    backgroundLoopPath: string;
+    clickSoundPath: string;
+    winSoundPath: string;
+  };
   backgroundPath: string;
   slotMachineAtlasPath: string;
   slotSymbolAtlasPath: string;
@@ -15,6 +20,11 @@ export type GameAssets = {
 };
 
 export const gameAssets: GameAssets = {
+  audio: {
+    backgroundLoopPath: "assets/audio/music/crystal_cave_theme_loop.mp3",
+    clickSoundPath: "assets/audio/sfx/ui_click.ogg",
+    winSoundPath: "assets/audio/sfx/win_level.ogg"
+  },
   backgroundPath: "assets/background.svg",
   slotMachineAtlasPath: "assets/atlases/slot-machine.json",
   slotSymbolAtlasPath: "assets/atlases/slot-symbols.json",

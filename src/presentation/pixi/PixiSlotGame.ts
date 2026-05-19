@@ -52,9 +52,15 @@ export class PixiSlotGame {
     this.renderLoading();
 
     this.loadedAssets = await this.options.assetLoader.load((progress) => {
-      this.loadingProgress = progress;
+      this.loadingProgress = progress * 0.82;
       this.renderLoading();
     });
+    await this.options.audio.load((progress) => {
+      this.loadingProgress = 0.82 + progress * 0.18;
+      this.renderLoading();
+    });
+    this.loadingProgress = 1;
+    this.renderLoading();
 
     this.syncViewport();
     this.loadingScreen.container.removeFromParent();
@@ -107,6 +113,7 @@ export class PixiSlotGame {
 
     this.isSpinning = true;
     this.currentOutcome = null;
+    void this.options.audio.playClick();
     this.renderMainScene();
 
     try {
@@ -147,8 +154,19 @@ export class PixiSlotGame {
   }
 
   private handleToggleSound(): void {
+    const wasMuted = this.options.audio.isMuted;
+
+    if (!wasMuted) {
+      void this.options.audio.playClick();
+    }
+
     this.options.audio.toggleMute();
     void this.options.audio.startBackgroundLoop();
+
+    if (wasMuted) {
+      void this.options.audio.playClick();
+    }
+
     this.renderMainScene();
   }
 }

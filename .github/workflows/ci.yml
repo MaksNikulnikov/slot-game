@@ -83,6 +83,9 @@ jobs:
           curl --fail --silent --show-error http://127.0.0.1:8080/assets/atlases/slot-symbols.png --output /tmp/slot-symbols.png
           curl --fail --silent --show-error http://127.0.0.1:8080/assets/atlases/slot-machine.json --output /tmp/slot-machine.json
           curl --fail --silent --show-error http://127.0.0.1:8080/assets/atlases/slot-machine.png --output /tmp/slot-machine.png
+          curl --fail --silent --show-error http://127.0.0.1:8080/assets/audio/music/crystal_cave_theme_loop.mp3 --output /tmp/background-loop.mp3
+          curl --fail --silent --show-error http://127.0.0.1:8080/assets/audio/sfx/ui_click.ogg --output /tmp/ui-click.ogg
+          curl --fail --silent --show-error http://127.0.0.1:8080/assets/audio/sfx/win_level.ogg --output /tmp/win-level.ogg
           curl --fail --silent --show-error http://127.0.0.1:8080/assets/spine/spineboy-pro.skel --output /tmp/spineboy-pro.skel
           curl --fail --silent --show-error http://127.0.0.1:8080/assets/spine/spineboy-pma.atlas --output /tmp/spineboy-pma.atlas
           curl --fail --silent --show-error http://127.0.0.1:8080/assets/spine/spineboy-pma.png --output /tmp/spineboy-pma.png

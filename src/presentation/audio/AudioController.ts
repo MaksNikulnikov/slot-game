@@ -3,13 +3,40 @@ type AudioGraph = {
   masterGain: GainNode;
 };
 
+export type AudioAssetPaths = {
+  backgroundLoopPath: string;
+  clickSoundPath: string;
+  winSoundPath: string;
+};
+
+export type AudioControllerOptions = {
+  assets: AudioAssetPaths;
+  baseUrl: string;
+};
+
+export type AudioProgressHandler = (progress: number) => void;
+
+type LoadedAudioBuffers = {
+  backgroundLoop: AudioBuffer;
+  click: AudioBuffer;
+  win: AudioBuffer;
+};
+
 export class AudioController {
   private graph: AudioGraph | null = null;
-  private backgroundOscillator: OscillatorNode | null = null;
+  private buffers: LoadedAudioBuffers | null = null;
+  private backgroundSource: AudioBufferSourceNode | null = null;
   private muted = false;
+  private loadingPromise: Promise<LoadedAudioBuffers> | null = null;
+
+  public constructor(private readonly options: AudioControllerOptions) {}
 
   public get isMuted(): boolean {
     return this.muted;
+  }
+
+  public async load(onProgress: AudioProgressHandler): Promise<void> {
+    await this.loadBuffers(onProgress);
   }
 
   public toggleMute(): boolean {
@@ -28,44 +55,139 @@ export class AudioController {
 
     await graph.context.resume();
 
-    if (this.backgroundOscillator !== null) {
+    const buffers = await this.loadBuffers();
+
+    if (this.backgroundSource !== null) {
       return;
     }
 
-    const oscillator = graph.context.createOscillator();
+    const source = graph.context.createBufferSource();
     const gain = graph.context.createGain();
 
-    oscillator.type = "triangle";
-    oscillator.frequency.value = 118;
-    gain.gain.value = 0.014;
-    oscillator.connect(gain).connect(graph.masterGain);
-    oscillator.start();
+    source.buffer = buffers.backgroundLoop;
+    source.loop = true;
+    gain.gain.value = 0.32;
+    source.connect(gain).connect(graph.masterGain);
+    source.start();
+    source.addEventListener("ended", () => {
+      if (this.backgroundSource === source) {
+        this.backgroundSource = null;
+      }
+    });
 
-    this.backgroundOscillator = oscillator;
+    this.backgroundSource = source;
+  }
+
+  public async playClick(): Promise<void> {
+    await this.playOneShot("click", 0.62);
   }
 
   public async playWin(): Promise<void> {
+    await this.playOneShot("win", 0.78);
+  }
+
+  private async playOneShot(
+    bufferName: "click" | "win",
+    volume: number
+  ): Promise<void> {
     const graph = this.getGraph();
-    const notes = [523.25, 659.25, 783.99] as const;
-    const startTime = graph.context.currentTime;
 
     await graph.context.resume();
 
-    notes.forEach((frequency, index) => {
-      const oscillator = graph.context.createOscillator();
-      const gain = graph.context.createGain();
-      const noteStart = startTime + index * 0.09;
-      const noteEnd = noteStart + 0.24;
+    const buffers = await this.loadBuffers();
+    const source = graph.context.createBufferSource();
+    const gain = graph.context.createGain();
 
-      oscillator.type = "square";
-      oscillator.frequency.value = frequency;
-      gain.gain.setValueAtTime(0.001, noteStart);
-      gain.gain.linearRampToValueAtTime(0.055, noteStart + 0.025);
-      gain.gain.exponentialRampToValueAtTime(0.001, noteEnd);
-      oscillator.connect(gain).connect(graph.masterGain);
-      oscillator.start(noteStart);
-      oscillator.stop(noteEnd);
-    });
+    source.buffer = buffers[bufferName];
+    gain.gain.value = volume;
+    source.connect(gain).connect(graph.masterGain);
+    source.start();
+  }
+
+  private async loadBuffers(
+    onProgress: AudioProgressHandler = () => {}
+  ): Promise<LoadedAudioBuffers> {
+    if (this.buffers !== null) {
+      onProgress(1);
+      return this.buffers;
+    }
+
+    if (this.loadingPromise !== null) {
+      const buffers = await this.loadingPromise;
+      onProgress(1);
+      return buffers;
+    }
+
+    const graph = this.getGraph();
+    const progressByAsset = {
+      backgroundLoop: 0,
+      click: 0,
+      win: 0
+    };
+    const updateProgress = (): void => {
+      const loaded =
+        progressByAsset.backgroundLoop +
+        progressByAsset.click +
+        progressByAsset.win;
+
+      onProgress(loaded / 3);
+    };
+
+    this.loadingPromise = Promise.all([
+      this.loadBuffer(
+        graph.context,
+        this.options.assets.backgroundLoopPath,
+        (progress) => {
+          progressByAsset.backgroundLoop = progress;
+          updateProgress();
+        }
+      ),
+      this.loadBuffer(
+        graph.context,
+        this.options.assets.clickSoundPath,
+        (progress) => {
+          progressByAsset.click = progress;
+          updateProgress();
+        }
+      ),
+      this.loadBuffer(
+        graph.context,
+        this.options.assets.winSoundPath,
+        (progress) => {
+          progressByAsset.win = progress;
+          updateProgress();
+        }
+      )
+    ]).then(([backgroundLoop, click, win]) => ({
+      backgroundLoop,
+      click,
+      win
+    }));
+
+    this.buffers = await this.loadingPromise;
+    this.loadingPromise = null;
+    onProgress(1);
+
+    return this.buffers;
+  }
+
+  private async loadBuffer(
+    context: AudioContext,
+    path: string,
+    onProgress: AudioProgressHandler
+  ): Promise<AudioBuffer> {
+    const response = await fetch(this.resolvePath(path));
+
+    if (!response.ok) {
+      throw new Error(`Cannot load audio asset "${path}"`);
+    }
+
+    const bytes = await response.arrayBuffer();
+    const buffer = await context.decodeAudioData(bytes);
+
+    onProgress(1);
+
+    return buffer;
   }
 
   private getGraph(): AudioGraph {
@@ -82,6 +204,10 @@ export class AudioController {
     }
 
     return this.graph;
+  }
+
+  private resolvePath(path: string): string {
+    return `${this.options.baseUrl}${path}`;
   }
 
   private applyMute(): void {
