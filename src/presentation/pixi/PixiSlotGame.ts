@@ -108,21 +108,31 @@ export class PixiSlotGame {
     this.isSpinning = true;
     this.currentOutcome = null;
     this.renderMainScene();
-    await this.options.audio.startBackgroundLoop();
-    this.reelsAnimator.start(this.mainScene.getReelSymbolLayers());
 
-    const outcome = await this.options.session.spin();
+    try {
+      await this.options.audio.startBackgroundLoop();
+      this.reelsAnimator.start(this.mainScene.getReelViews());
 
-    this.currentSymbols = outcome.symbols;
-    this.currentOutcome = outcome;
-    this.renderMainScene();
-    if (outcome.isWin) {
-      void this.options.audio.playWin();
+      const outcome = await this.options.session.spin();
+
+      await this.reelsAnimator.settle(
+        this.mainScene.getReelViews(),
+        outcome.symbols
+      );
+      this.currentSymbols = outcome.symbols;
+      this.currentOutcome = outcome;
+      this.isSpinning = false;
+      this.renderMainScene();
+
+      if (outcome.isWin) {
+        void this.options.audio.playWin();
+      }
+    } catch (error) {
+      this.reelsAnimator.stopAndClear(this.mainScene.getReelViews());
+      this.isSpinning = false;
+      this.renderMainScene();
+      throw error;
     }
-    await this.reelsAnimator.settle(this.mainScene.getReelSymbolLayers());
-
-    this.isSpinning = false;
-    this.renderMainScene();
   }
 
   private getViewport(): SlotViewport {

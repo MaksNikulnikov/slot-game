@@ -1,55 +1,60 @@
-import { Container, Graphics } from "pixi.js";
+import { Container } from "pixi.js";
+import type { Texture } from "pixi.js";
 
+import type { SlotSymbol } from "../../core/slot/Symbol";
 import type { SlotSymbols } from "../../core/slot/Symbol";
 import type { SlotLayout } from "../layout/SlotLayout";
-import { clearContainer } from "./pixiContainerUtils";
-import { SymbolView } from "./SymbolView";
+import { SlotReelView } from "./SlotReelView";
+
+const reelSequences = [
+  ["cherry", "lemon", "seven"],
+  ["lemon", "seven", "cherry"],
+  ["seven", "cherry", "lemon"]
+] as const satisfies readonly [
+  readonly SlotSymbol[],
+  readonly SlotSymbol[],
+  readonly SlotSymbol[]
+];
 
 export class ReelsView {
   public readonly container = new Container();
-  private readonly backgroundLayer = new Container();
-  private readonly symbolLayers: [Container, Container, Container] = [
-    new Container(),
-    new Container(),
-    new Container()
-  ];
+  private readonly reelViews: [SlotReelView, SlotReelView, SlotReelView];
 
-  public constructor(private readonly symbolView = new SymbolView()) {
+  public constructor(symbolTextures: Record<SlotSymbol, Texture>) {
+    this.reelViews = [
+      new SlotReelView(reelSequences[0], symbolTextures),
+      new SlotReelView(reelSequences[1], symbolTextures),
+      new SlotReelView(reelSequences[2], symbolTextures)
+    ];
     this.container.label = "reels";
-    this.backgroundLayer.label = "reels/backgrounds";
-    this.symbolLayers.forEach((layer, index) => {
-      layer.label = `reels/symbolLayer-${index}`;
+    this.reelViews.forEach((reelView, index) => {
+      reelView.container.label = `reels/reel-${index}`;
     });
-    this.container.addChild(this.backgroundLayer, ...this.symbolLayers);
+    this.container.addChild(
+      this.reelViews[0].container,
+      this.reelViews[1].container,
+      this.reelViews[2].container
+    );
   }
 
-  public render(layout: SlotLayout["reels"], symbols: SlotSymbols): void {
+  public render(
+    layout: SlotLayout["reels"],
+    symbols: SlotSymbols,
+    isSpinning: boolean
+  ): void {
     const [firstCell, secondCell, thirdCell] = layout.cells;
     const [firstSymbol, secondSymbol, thirdSymbol] = symbols;
 
-    clearContainer(this.backgroundLayer);
-    this.symbolLayers.forEach((layer) => {
-      clearContainer(layer);
-    });
-    this.addCellBackgrounds(layout);
-    this.symbolLayers[0].addChild(this.symbolView.create(firstSymbol, firstCell));
-    this.symbolLayers[1].addChild(
-      this.symbolView.create(secondSymbol, secondCell)
-    );
-    this.symbolLayers[2].addChild(this.symbolView.create(thirdSymbol, thirdCell));
+    this.reelViews[0].render(firstCell, firstSymbol, isSpinning);
+    this.reelViews[1].render(secondCell, secondSymbol, isSpinning);
+    this.reelViews[2].render(thirdCell, thirdSymbol, isSpinning);
   }
 
-  public getSymbolLayers(): readonly [Container, Container, Container] {
-    return this.symbolLayers;
-  }
-
-  private addCellBackgrounds(layout: SlotLayout["reels"]): void {
-    layout.cells.forEach((cell) => {
-      const background = new Graphics()
-        .roundRect(cell.x, cell.y, cell.width, cell.height, 22)
-        .fill(0x0b1824);
-
-      this.backgroundLayer.addChild(background);
-    });
+  public getReelViews(): readonly [
+    SlotReelView,
+    SlotReelView,
+    SlotReelView
+  ] {
+    return this.reelViews;
   }
 }

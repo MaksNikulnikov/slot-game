@@ -1,14 +1,18 @@
 import "@esotericsoftware/spine-pixi-v8";
 
 import { Assets } from "pixi.js";
+import type { Spritesheet } from "pixi.js";
 import type { Texture } from "pixi.js";
 
+import { slotSymbols } from "../../core/slot/Symbol";
+import type { SlotSymbol } from "../../core/slot/Symbol";
 import type { GameAssets } from "./gameAssets";
 
 export type AssetProgressHandler = (progress: number) => void;
 
 export type LoadedGameAssets = {
   backgroundTexture: Texture;
+  slotSymbolTextures: Record<SlotSymbol, Texture>;
   spineCharacter: {
     atlasAlias: string;
     skeletonAlias: string;
@@ -42,14 +46,21 @@ export class GameAssetLoader {
     const backgroundTexture = await Assets.load<Texture>(
       this.resolvePath(this.options.assets.backgroundPath),
       (progress) => {
-        onProgress(progress * 0.4);
+        onProgress(progress * 0.25);
       }
     );
 
     await Assets.load(
       [spineCharacter.skeletonAlias, spineCharacter.atlasAlias],
       (progress) => {
-        onProgress(0.4 + progress * 0.6);
+        onProgress(0.25 + progress * 0.45);
+      }
+    );
+
+    const slotSymbolAtlas = await Assets.load<Spritesheet>(
+      this.resolvePath(this.options.assets.slotSymbolAtlasPath),
+      (progress) => {
+        onProgress(0.7 + progress * 0.3);
       }
     );
 
@@ -57,6 +68,7 @@ export class GameAssetLoader {
 
     return {
       backgroundTexture,
+      slotSymbolTextures: this.resolveSlotSymbolTextures(slotSymbolAtlas),
       spineCharacter: {
         atlasAlias: spineCharacter.atlasAlias,
         skeletonAlias: spineCharacter.skeletonAlias
@@ -66,5 +78,24 @@ export class GameAssetLoader {
 
   private resolvePath(path: string): string {
     return `${this.options.baseUrl}${path}`;
+  }
+
+  private resolveSlotSymbolTextures(
+    atlas: Spritesheet
+  ): Record<SlotSymbol, Texture> {
+    const textures = {} as Record<SlotSymbol, Texture>;
+
+    slotSymbols.forEach((symbol) => {
+      const textureName = this.options.assets.slotSymbolTextureNames[symbol];
+      const texture = atlas.textures[textureName];
+
+      if (texture === undefined) {
+        throw new Error(`Slot symbol texture "${textureName}" was not loaded`);
+      }
+
+      textures[symbol] = texture;
+    });
+
+    return textures;
   }
 }

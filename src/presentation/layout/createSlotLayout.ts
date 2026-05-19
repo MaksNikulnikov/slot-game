@@ -5,13 +5,13 @@ const sceneHeight = 720;
 
 export function createSlotLayout(_viewport: SlotViewport): SlotLayout {
   const reelsFrame = {
-    x: 290,
-    y: 190,
-    width: 700,
-    height: 230
+    x: 285,
+    y: 145,
+    width: 720,
+    height: 385
   };
-  const reelPadding = 28;
-  const reelGap = 18;
+  const reelPadding = 34;
+  const reelGap = 22;
   const reelWidth = (reelsFrame.width - reelPadding * 2 - reelGap * 2) / 3;
   const reelHeight = reelsFrame.height - reelPadding * 2;
   const firstReelX = reelsFrame.x + reelPadding;
@@ -51,7 +51,7 @@ export function createSlotLayout(_viewport: SlotViewport): SlotLayout {
     },
     spinButton: {
       x: 526,
-      y: 490,
+      y: 585,
       width: 228,
       height: 78
     },
@@ -63,13 +63,13 @@ export function createSlotLayout(_viewport: SlotViewport): SlotLayout {
     },
     character: {
       x: 76,
-      y: 190,
+      y: 220,
       width: 178,
       height: 260
     },
     outcomeBanner: {
       x: 425,
-      y: 432,
+      y: 537,
       width: 430,
       height: 42
     }

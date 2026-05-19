@@ -8,9 +8,10 @@ A small HTML5 slot game built with Pixi.js, TypeScript, Webpack, GSAP, and Spine
 - Main slot scene with background image, reels frame, three reels, three symbols, and spin button.
 - Mock server spin response with randomized symbols.
 - Win detection for three equal symbols.
-- GSAP reel spin and settle animation.
+- GSAP reel spin and staggered settle animation with masked reel strips.
 - Spine character that switches visual states for idle, win, and lose outcomes.
 - Background Web Audio loop, win sound, and mute toggle.
+- Source PNG symbol pipeline that builds a Pixi spritesheet from atlas manifests.
 
 ## Run Locally
 
@@ -24,6 +25,7 @@ Open `http://localhost:5173`.
 ## Scripts
 
 ```bash
+npm run assets:atlas
 npm run check
 npm run test
 npm run build
@@ -51,6 +53,10 @@ src/
 The Pixi layer calls the slot through `SlotGameSession`. Core code does not import Pixi, GSAP, Spine, DOM, or audio APIs.
 
 ## Assets
+
+Slot symbol source PNGs live in `assets/images/slot-symbols` with an `atlas.manifest.json` next to them. Run `npm run assets:atlas` to generate `public/assets/atlases/slot-symbols.json` and `slot-symbols.png`; the command is also wired into `predev` and `prebuild`.
+
+See `docs/asset-atlas-pipeline.md` for the manifest format and runtime loading notes.
 
 The Spineboy asset is copied from the official Spine Runtimes 4.2 examples and kept locally under `public/assets/spine`. Its original license is included as `spineboy-license.txt`.
 

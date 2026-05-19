@@ -3,7 +3,10 @@
   "private": true,
   "version": "0.1.0",
   "scripts": {
+    "assets:atlas": "node scripts/build-atlases.mjs",
+    "predev": "npm run assets:atlas",
     "dev": "webpack serve --mode development",
+    "prebuild": "npm run assets:atlas",
     "build": "tsc --noEmit && webpack --mode production",
     "check": "tsc --noEmit",
     "test": "vitest run"
