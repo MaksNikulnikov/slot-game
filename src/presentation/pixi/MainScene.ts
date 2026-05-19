@@ -8,6 +8,7 @@ import { gameText } from "../text/gameText";
 import { BackgroundView } from "./BackgroundView";
 import { OutcomeBannerView } from "./OutcomeBannerView";
 import { clearContainer } from "./pixiContainerUtils";
+import { MuteButtonView } from "./MuteButtonView";
 import { ReelsFrameView } from "./ReelsFrameView";
 import { ReelsView } from "./ReelsView";
 import { SpineCharacterView } from "./SpineCharacterView";
@@ -16,11 +17,13 @@ import { SpinButtonView } from "./SpinButtonView";
 export type MainSceneState = {
   symbols: SlotSymbols;
   isSpinning: boolean;
+  isMuted: boolean;
   outcome: SpinOutcome | null;
 };
 
 export type MainSceneOptions = {
   assets: LoadedGameAssets;
+  onToggleSound(): void;
   onSpin(): void;
 };
 
@@ -31,6 +34,7 @@ export class MainScene {
   private readonly titleLayer = new Container();
   private readonly reelsFrameView = new ReelsFrameView();
   private readonly reelsView = new ReelsView();
+  private readonly muteButtonView: MuteButtonView;
   private readonly spinButtonView: SpinButtonView;
   private readonly outcomeBannerView = new OutcomeBannerView();
   private readonly characterView: SpineCharacterView;
@@ -38,6 +42,9 @@ export class MainScene {
   public constructor(options: MainSceneOptions) {
     this.assets = options.assets;
     this.characterView = new SpineCharacterView(options.assets.spineCharacter);
+    this.muteButtonView = new MuteButtonView({
+      onTap: options.onToggleSound
+    });
     this.spinButtonView = new SpinButtonView({
       onTap: options.onSpin
     });
@@ -50,6 +57,7 @@ export class MainScene {
       this.reelsFrameView.container,
       this.reelsView.container,
       this.outcomeBannerView.container,
+      this.muteButtonView.container,
       this.spinButtonView.container
     );
   }
@@ -61,6 +69,7 @@ export class MainScene {
     this.reelsFrameView.render(layout.reels);
     this.reelsView.render(layout.reels, state.symbols);
     this.outcomeBannerView.render(layout.outcomeBanner, state.outcome);
+    this.muteButtonView.render(layout.muteButton, state.isMuted);
     this.spinButtonView.render(layout.spinButton, !state.isSpinning);
   }
 

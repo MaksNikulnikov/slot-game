@@ -4,6 +4,7 @@ import type { SpinOutcome } from "../../core/slot/SpinOutcome";
 import type { SlotSymbols } from "../../core/slot/Symbol";
 import type { SlotGameSession } from "../SlotGameSession";
 import { ReelsAnimator } from "../animation/ReelsAnimator";
+import type { AudioController } from "../audio/AudioController";
 import type { GameAssetLoader } from "../assets/GameAssetLoader";
 import type { LoadedGameAssets } from "../assets/GameAssetLoader";
 import type { SlotLayout, SlotViewport } from "../layout/SlotLayout";
@@ -13,6 +14,7 @@ import { fitSceneIntoViewport } from "./fitSceneIntoViewport";
 
 export type PixiSlotGameOptions = {
   assetLoader: GameAssetLoader;
+  audio: AudioController;
   createLayout(viewport: SlotViewport): SlotLayout;
   initialSymbols: SlotSymbols;
   session: SlotGameSession;
@@ -59,6 +61,9 @@ export class PixiSlotGame {
     this.loadingScreen.destroy();
     this.mainScene = new MainScene({
       assets: this.loadedAssets,
+      onToggleSound: () => {
+        this.handleToggleSound();
+      },
       onSpin: () => {
         void this.handleSpin();
       }
@@ -89,6 +94,7 @@ export class PixiSlotGame {
       {
         symbols: this.currentSymbols,
         isSpinning: this.isSpinning,
+        isMuted: this.options.audio.isMuted,
         outcome: this.currentOutcome
       }
     );
@@ -102,6 +108,7 @@ export class PixiSlotGame {
     this.isSpinning = true;
     this.currentOutcome = null;
     this.renderMainScene();
+    await this.options.audio.startBackgroundLoop();
     this.reelsAnimator.start(this.mainScene.getReelSymbolLayers());
 
     const outcome = await this.options.session.spin();
@@ -109,6 +116,9 @@ export class PixiSlotGame {
     this.currentSymbols = outcome.symbols;
     this.currentOutcome = outcome;
     this.renderMainScene();
+    if (outcome.isWin) {
+      void this.options.audio.playWin();
+    }
     await this.reelsAnimator.settle(this.mainScene.getReelSymbolLayers());
 
     this.isSpinning = false;
@@ -124,5 +134,11 @@ export class PixiSlotGame {
 
   private syncViewport(): void {
     this.app.resize();
+  }
+
+  private handleToggleSound(): void {
+    this.options.audio.toggleMute();
+    void this.options.audio.startBackgroundLoop();
+    this.renderMainScene();
   }
 }

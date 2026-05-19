@@ -2,6 +2,7 @@ import { MockSpinServer } from "../core/server/MockSpinServer";
 import { SlotMachine } from "../core/slot/SlotMachine";
 import { GameAssetLoader } from "../presentation/assets/GameAssetLoader";
 import { gameAssets } from "../presentation/assets/gameAssets";
+import { AudioController } from "../presentation/audio/AudioController";
 import { createSlotLayout } from "../presentation/layout/createSlotLayout";
 import { PixiSlotGame } from "../presentation/pixi/PixiSlotGame";
 import type { SlotGameSession } from "../presentation/SlotGameSession";
@@ -22,6 +23,7 @@ export async function createGame(): Promise<void> {
       assets: gameAssets,
       baseUrl: ""
     }),
+    audio: new AudioController(),
     createLayout: createSlotLayout,
     initialSymbols: ["cherry", "lemon", "seven"],
     session
