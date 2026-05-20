@@ -1,33 +1,31 @@
 import { Container, Graphics } from "pixi.js";
 
 import type { RectLayout, SlotLayout } from "../layout/SlotLayout";
-import { clearContainer } from "./pixiContainerUtils";
 
 const gradientSteps = 28;
 
 export class ReelsShadowView {
   public readonly container = new Container();
+  private readonly shadow = new Graphics();
 
   public constructor() {
     this.container.label = "reelsShadow";
+    this.container.addChild(this.shadow);
   }
 
   public render(layout: SlotLayout["reels"]): void {
-    const shadow = new Graphics();
-
-    clearContainer(this.container);
+    this.shadow.clear();
     layout.cells.forEach((cell) => {
-      shadow
+      this.shadow
         .roundRect(cell.x, cell.y, cell.width, cell.height, 24)
         .stroke({
           color: 0x000000,
           alpha: 0.22,
           width: 10
         });
-      this.addTopShadow(shadow, cell);
-      this.addBottomShadow(shadow, cell);
+      this.addTopShadow(this.shadow, cell);
+      this.addBottomShadow(this.shadow, cell);
     });
-    this.container.addChild(shadow);
   }
 
   private addTopShadow(graphics: Graphics, cell: RectLayout): void {

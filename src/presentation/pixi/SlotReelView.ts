@@ -3,26 +3,29 @@ import type { Texture } from "pixi.js";
 
 import type { SlotSymbol } from "../../core/slot/Symbol";
 import type { RectLayout } from "../layout/SlotLayout";
-import { clearContainer } from "./pixiContainerUtils";
 import { SymbolView } from "./SymbolView";
+import type { SymbolDisplay } from "./SymbolView";
 
 const visibleSlotOffsets = [-3, -2, -1, 0, 1, 2, 3] as const;
 
 type ReelTile = {
-  container: Container;
+  display: SymbolDisplay;
   symbol: SlotSymbol | null;
 };
 
 export class SlotReelView {
   public readonly container = new Container();
   private readonly chromeLayer = new Container();
+  private readonly chromeBackground = new Graphics();
+  private readonly chromeInnerShade = new Graphics();
+  private readonly chromeCenterSheen = new Graphics();
+  private readonly chromePaylineGlow = new Graphics();
   private readonly symbolLayer = new Container();
   private readonly maskShape = new Graphics();
   private readonly curvatureLayer = new Container();
-  private readonly tiles: ReelTile[] = visibleSlotOffsets.map(() => ({
-    container: new Container(),
-    symbol: null
-  }));
+  private readonly curvatureSideShade = new Graphics();
+  private readonly curvatureCenterGlow = new Graphics();
+  private readonly tiles: ReelTile[];
   private layout: RectLayout | null = null;
   private symbolStep = 0;
   private symbolLayout: RectLayout = {
@@ -39,13 +42,31 @@ export class SlotReelView {
     private readonly textures: Record<SlotSymbol, Texture>,
     private readonly symbolView = new SymbolView()
   ) {
+    this.tiles = visibleSlotOffsets.map(() => ({
+      display: this.symbolView.createDisplay(),
+      symbol: null
+    }));
+
     this.container.label = "slotReel";
+    this.chromeLayer.label = "slotReel/chrome";
     this.symbolLayer.label = "slotReel/symbols";
     this.maskShape.label = "slotReel/mask";
     this.maskShape.alpha = 0;
     this.curvatureLayer.label = "slotReel/curvature";
-    this.symbolLayer.addChild(...this.tiles.map((tile) => tile.container));
+    this.symbolLayer.addChild(
+      ...this.tiles.map((tile) => tile.display.container)
+    );
     this.symbolLayer.mask = this.maskShape;
+    this.chromeLayer.addChild(
+      this.chromeBackground,
+      this.chromeCenterSheen,
+      this.chromeInnerShade,
+      this.chromePaylineGlow
+    );
+    this.curvatureLayer.addChild(
+      this.curvatureSideShade,
+      this.curvatureCenterGlow
+    );
     this.container.addChild(
       this.chromeLayer,
       this.symbolLayer,
@@ -151,13 +172,13 @@ export class SlotReelView {
       const yScale =
         1 - edgeAmount ** 1.12 * (0.54 + this.spinIntensity * 0.12);
 
-      tile.container.position.set(
+      tile.display.container.position.set(
         layout.width / 2,
         projectedY
       );
-      tile.container.alpha =
+      tile.display.container.alpha =
         0.2 + curveAmount * 0.8 - this.spinIntensity * edgeAmount * 0.08;
-      tile.container.scale.set(
+      tile.display.container.scale.set(
         xScale,
         yScale
       );
@@ -166,48 +187,49 @@ export class SlotReelView {
 
   private renderTile(tile: ReelTile, symbol: SlotSymbol): void {
     tile.symbol = symbol;
-    clearContainer(tile.container);
-    tile.container.addChild(
-      this.symbolView.create(symbol, this.textures[symbol], this.symbolLayout)
+    this.symbolView.render(
+      tile.display,
+      symbol,
+      this.textures[symbol],
+      this.symbolLayout
     );
   }
 
   private renderChrome(layout: RectLayout): void {
-    const background = new Graphics()
+    this.chromeBackground
+      .clear()
       .roundRect(0, 0, layout.width, layout.height, 28)
       .fill(0xf5efe1)
       .stroke({
         color: 0xffd980,
         width: 4
       });
-    const innerShade = new Graphics()
+
+    this.chromeInnerShade
+      .clear()
       .roundRect(8, 8, layout.width - 16, layout.height - 16, 22)
       .stroke({
         color: 0x8f6a2a,
         alpha: 0.2,
         width: 3
       });
-    const centerSheen = new Graphics()
+
+    this.chromeCenterSheen
+      .clear()
       .roundRect(12, layout.height / 2 - 66, layout.width - 24, 132, 28)
       .fill({
         color: 0xffffff,
         alpha: 0.2
       });
-    const paylineGlow = new Graphics()
+
+    this.chromePaylineGlow
+      .clear()
       .roundRect(10, layout.height / 2 - 54, layout.width - 20, 108, 26)
       .stroke({
         color: 0xffcc4d,
         alpha: 0.26,
         width: 4
       });
-
-    clearContainer(this.chromeLayer);
-    this.chromeLayer.addChild(
-      background,
-      centerSheen,
-      innerShade,
-      paylineGlow
-    );
   }
 
   private renderMask(layout: RectLayout): void {
@@ -217,23 +239,23 @@ export class SlotReelView {
   }
 
   private renderCurvature(layout: RectLayout): void {
-    const sideShade = new Graphics()
+    this.curvatureSideShade
+      .clear()
       .roundRect(0, 0, layout.width, layout.height, 24)
       .stroke({
         color: 0x000000,
         alpha: 0.2,
         width: 16
       });
-    const centerGlow = new Graphics()
+
+    this.curvatureCenterGlow
+      .clear()
       .roundRect(14, layout.height / 2 - 60, layout.width - 28, 120, 32)
       .stroke({
         color: 0xffffff,
         alpha: 0.24,
         width: 5
       });
-
-    clearContainer(this.curvatureLayer);
-    this.curvatureLayer.addChild(sideShade, centerGlow);
   }
 
   private createSymbolLayout(layout: RectLayout): RectLayout {

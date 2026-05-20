@@ -7,7 +7,6 @@ import type { SlotLayout } from "../layout/SlotLayout";
 import { gameText } from "../text/gameText";
 import { BackgroundView } from "./BackgroundView";
 import { OutcomeBannerView } from "./OutcomeBannerView";
-import { clearContainer } from "./pixiContainerUtils";
 import { MuteButtonView } from "./MuteButtonView";
 import { ReelsFrameView } from "./ReelsFrameView";
 import { ReelsShadowView } from "./ReelsShadowView";
@@ -34,7 +33,15 @@ export class MainScene {
   public readonly container = new Container();
   private readonly assets: LoadedGameAssets;
   private readonly backgroundView = new BackgroundView();
-  private readonly titleLayer = new Container();
+  private readonly title = new Text({
+    text: gameText.title,
+    style: {
+      fill: "#f8e7b0",
+      fontFamily: "Trebuchet MS, Segoe UI, sans-serif",
+      fontSize: 42,
+      fontWeight: "700"
+    }
+  });
   private readonly reelsFrameView: ReelsFrameView;
   private readonly reelsView: ReelsView;
   private readonly reelsShadowView = new ReelsShadowView();
@@ -59,9 +66,11 @@ export class MainScene {
     });
 
     this.container.label = "mainScene";
+    this.title.anchor.set(0.5);
+    this.title.label = "title";
     this.container.addChild(
       this.backgroundView.container,
-      this.titleLayer,
+      this.title,
       this.characterView.container,
       this.reelsView.container,
       this.winLineView.container,
@@ -75,7 +84,7 @@ export class MainScene {
 
   public render(layout: SlotLayout, state: MainSceneState): void {
     this.backgroundView.render(layout, this.assets.backgroundTexture);
-    this.addTitle(layout);
+    this.renderTitle(layout);
     this.characterView.render(layout.character, this.getCharacterMood(state));
     this.reelsView.render(layout.reels, state.symbols, state.isSpinning);
     this.winLineView.render(layout.reels, state.outcome?.isWin === true);
@@ -94,22 +103,8 @@ export class MainScene {
     return this.reelsView.getReelViews();
   }
 
-  private addTitle(layout: SlotLayout): void {
-    const title = new Text({
-      text: gameText.title,
-      style: {
-        fill: "#f8e7b0",
-        fontFamily: "Trebuchet MS, Segoe UI, sans-serif",
-        fontSize: 42,
-        fontWeight: "700"
-      }
-    });
-
-    title.anchor.set(0.5);
-    title.position.set(layout.title.x, layout.title.y);
-    title.label = "title";
-    clearContainer(this.titleLayer);
-    this.titleLayer.addChild(title);
+  private renderTitle(layout: SlotLayout): void {
+    this.title.position.set(layout.title.x, layout.title.y);
   }
 
   private getCharacterMood(state: MainSceneState): "idle" | "win" | "lose" {
