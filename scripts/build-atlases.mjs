@@ -10,6 +10,7 @@ const MANIFEST_FILE = "atlas.manifest.json";
 const DEFAULT_IMAGES_ROOT = resolve("assets/images");
 const DEFAULT_OUTPUT_ROOT = resolve("public/assets/atlases");
 const TRANSPARENT_ALPHA_THRESHOLD = 4;
+const MAX_ATLAS_SIDE = 2048;
 
 const crcTable = createCrcTable();
 
@@ -54,7 +55,7 @@ function buildAtlas(manifestPath) {
   const manifestDir = dirname(manifestPath);
   const manifest = readManifest(manifestPath);
   const atlasName = validateText(manifest.atlasName, "atlasName");
-  const maxSize = validatePositiveInteger(manifest.maxSize, "maxSize");
+  const maxSize = validateMaxAtlasSize(manifest.maxSize, "maxSize");
   const resolution = validatePositiveNumber(manifest.resolution ?? 1, "resolution");
   const padding = validateNonNegativeInteger(manifest.padding ?? 2, "padding");
   const outputRoot = resolve(manifest.output ?? DEFAULT_OUTPUT_ROOT);
@@ -64,6 +65,7 @@ function buildAtlas(manifestPath) {
   );
   const placements = packSprites(sprites, maxSize, padding);
   const atlas = createAtlasBitmap(placements);
+  validateAtlasBitmapSize(atlas, maxSize, atlasName);
   const atlasImageName = `${atlasName}.png`;
   const atlasJsonName = `${atlasName}.json`;
   const frames = {};
@@ -166,6 +168,32 @@ function validatePositiveInteger(value, fieldName) {
   }
 
   return value;
+}
+
+function validateMaxAtlasSize(value, fieldName) {
+  const maxSize = validatePositiveInteger(value, fieldName);
+
+  if (maxSize > MAX_ATLAS_SIDE) {
+    throw new Error(`${fieldName} must not exceed ${MAX_ATLAS_SIDE}px.`);
+  }
+
+  return maxSize;
+}
+
+function validateAtlasBitmapSize(atlas, maxSize, atlasName) {
+  if (atlas.width > maxSize || atlas.height > maxSize) {
+    throw new Error(
+      `${atlasName} atlas is ${atlas.width}x${atlas.height}px, ` +
+        `which exceeds its ${maxSize}px maxSize.`
+    );
+  }
+
+  if (atlas.width > MAX_ATLAS_SIDE || atlas.height > MAX_ATLAS_SIDE) {
+    throw new Error(
+      `${atlasName} atlas is ${atlas.width}x${atlas.height}px, ` +
+        `which exceeds the global ${MAX_ATLAS_SIDE}px side limit.`
+    );
+  }
 }
 
 function validateNonNegativeInteger(value, fieldName) {

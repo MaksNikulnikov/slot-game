@@ -97,7 +97,7 @@ background, audio, and Spine assets are served successfully.
 
 ## Review Notes
 
-- Time spent: approximately 6 hours.
+- Time spent: approximately 8 hours.
 - The code is split into `core` and `presentation` layers. The slot rules and
   mock server contracts do not depend on Pixi, GSAP, Spine, DOM, or audio APIs.
 - This boundary makes it easier to swap the rendering engine later, for example

@@ -1,13 +1,27 @@
+* {
+  box-sizing: border-box;
+}
+
 html,
 body,
 #app {
+  width: 100%;
   height: 100%;
   margin: 0;
   overflow: hidden;
 }
 
+html {
+  background: #07131d;
+}
+
 body {
   background: #07131d;
+  color: #ffffff;
+  overscroll-behavior: none;
+  touch-action: none;
+  user-select: none;
+  -webkit-font-smoothing: antialiased;
 }
 
 #app {
@@ -19,4 +33,5 @@ canvas {
   display: block;
   width: 100%;
   height: 100%;
+  touch-action: none;
 }

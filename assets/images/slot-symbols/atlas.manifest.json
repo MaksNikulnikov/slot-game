@@ -6,29 +6,8 @@
   "output": "public/assets/atlases",
   "images": [
     {
-      "name": "slot.bar",
-      "file": "bar.png",
-      "scale": 0.62,
-      "trim": true,
-      "anchor": { "x": 0.5, "y": 0.5 }
-    },
-    {
-      "name": "slot.bell",
-      "file": "bell.png",
-      "scale": 0.62,
-      "trim": true,
-      "anchor": { "x": 0.5, "y": 0.5 }
-    },
-    {
       "name": "slot.cherry",
       "file": "chery.png",
-      "scale": 0.62,
-      "trim": true,
-      "anchor": { "x": 0.5, "y": 0.5 }
-    },
-    {
-      "name": "slot.diamond",
-      "file": "diamond.png",
       "scale": 0.62,
       "trim": true,
       "anchor": { "x": 0.5, "y": 0.5 }

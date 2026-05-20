@@ -14,7 +14,6 @@ import { ReelsView } from "./ReelsView";
 import type { SlotReelView } from "./SlotReelView";
 import { SpineCharacterView } from "./SpineCharacterView";
 import { SpinButtonView } from "./SpinButtonView";
-import { WinLineView } from "./WinLineView";
 
 export type MainSceneState = {
   symbols: SlotSymbols;
@@ -45,7 +44,6 @@ export class MainScene {
   private readonly reelsFrameView: ReelsFrameView;
   private readonly reelsView: ReelsView;
   private readonly reelsShadowView = new ReelsShadowView();
-  private readonly winLineView = new WinLineView();
   private readonly muteButtonView: MuteButtonView;
   private readonly spinButtonView: SpinButtonView;
   private readonly outcomeBannerView = new OutcomeBannerView();
@@ -73,7 +71,6 @@ export class MainScene {
       this.title,
       this.characterView.container,
       this.reelsView.container,
-      this.winLineView.container,
       this.reelsShadowView.container,
       this.reelsFrameView.container,
       this.outcomeBannerView.container,
@@ -86,8 +83,12 @@ export class MainScene {
     this.backgroundView.render(layout, this.assets.backgroundTexture);
     this.renderTitle(layout);
     this.characterView.render(layout.character, this.getCharacterMood(state));
-    this.reelsView.render(layout.reels, state.symbols, state.isSpinning);
-    this.winLineView.render(layout.reels, state.outcome?.isWin === true);
+    this.reelsView.render(
+      layout.reels,
+      state.symbols,
+      state.isSpinning,
+      state.outcome?.isWin === true
+    );
     this.reelsShadowView.render(layout.reels);
     this.reelsFrameView.render(layout.reels);
     this.outcomeBannerView.render(layout.outcomeBanner, state.outcome);

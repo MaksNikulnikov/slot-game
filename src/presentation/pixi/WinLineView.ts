@@ -30,7 +30,8 @@ const sparkles: readonly Sparkle[] = [
 ];
 
 export class WinLineView {
-  public readonly container = new Container();
+  public readonly backlightContainer = new Container();
+  public readonly foregroundContainer = new Container();
   private readonly dimLayer = new Graphics();
   private readonly auraLayer = new Graphics();
   private readonly panelLayer = new Graphics();
@@ -47,12 +48,16 @@ export class WinLineView {
   private isActive = false;
 
   public constructor() {
-    this.container.label = "winLine";
-    this.container.visible = false;
-    this.container.addChild(
+    this.backlightContainer.label = "winLine/backlight";
+    this.foregroundContainer.label = "winLine/foreground";
+    this.backlightContainer.visible = false;
+    this.foregroundContainer.visible = false;
+    this.backlightContainer.addChild(
       this.dimLayer,
       this.auraLayer,
-      this.panelLayer,
+      this.panelLayer
+    );
+    this.foregroundContainer.addChild(
       this.cometLayer,
       this.sparkleLayer
     );
@@ -77,7 +82,8 @@ export class WinLineView {
   private start(): void {
     this.timeline?.kill();
     this.isActive = true;
-    this.container.visible = true;
+    this.backlightContainer.visible = true;
+    this.foregroundContainer.visible = true;
     this.state.reveal = 0;
     this.state.comet = 0;
     this.state.pulse = 0;
@@ -148,7 +154,8 @@ export class WinLineView {
     this.timeline?.kill();
     this.timeline = null;
     this.isActive = false;
-    this.container.visible = false;
+    this.backlightContainer.visible = false;
+    this.foregroundContainer.visible = false;
     this.clear();
   }
 
@@ -198,32 +205,47 @@ export class WinLineView {
   private drawAuras(paylineBand: RectLayout): void {
     const reveal = this.state.reveal;
     const pulse = 0.55 + this.state.pulse * 0.45;
-    const spread = 10 + this.state.pulse * 10;
+    const outerXSpread = 14;
+    const innerXSpread = 8;
+    const outerYSpread = 9 + this.state.pulse * 17;
+    const innerYSpread = 4 + this.state.pulse * 10;
+    const radiusPulse = this.state.pulse * 6;
 
     this.auraLayer.clear();
     this.auraLayer
       .roundRect(
-        paylineBand.x - spread,
-        paylineBand.y - spread * 0.55,
-        paylineBand.width + spread * 2,
-        paylineBand.height + spread * 1.1,
-        34 + spread * 0.35
+        paylineBand.x - outerXSpread,
+        paylineBand.y - outerYSpread,
+        paylineBand.width + outerXSpread * 2,
+        paylineBand.height + outerYSpread * 2,
+        38 + radiusPulse
       )
       .fill({
-        color: 0xffb21d,
-        alpha: reveal * 0.1 * pulse
+        color: 0xff8f00,
+        alpha: reveal * 0.18 * pulse
       })
       .roundRect(
-        paylineBand.x - 5,
-        paylineBand.y - 5,
-        paylineBand.width + 10,
-        paylineBand.height + 10,
-        32
+        paylineBand.x - innerXSpread,
+        paylineBand.y - innerYSpread,
+        paylineBand.width + innerXSpread * 2,
+        paylineBand.height + innerYSpread * 2,
+        34 + radiusPulse * 0.75
+      )
+      .fill({
+        color: 0xffd65c,
+        alpha: reveal * 0.24 * pulse
+      })
+      .roundRect(
+        paylineBand.x - 7,
+        paylineBand.y - 7,
+        paylineBand.width + 14,
+        paylineBand.height + 14,
+        34
       )
       .stroke({
-        color: 0xffc441,
-        alpha: reveal * 0.44 * pulse,
-        width: 11
+        color: 0xfff0a6,
+        alpha: reveal * 0.58 * pulse,
+        width: 10
       });
   }
 
@@ -243,49 +265,60 @@ export class WinLineView {
         30
       )
       .fill({
-        color: 0xffffff,
-        alpha: reveal * 0.18
+        color: 0xffb625,
+        alpha: reveal * 0.34
       })
       .roundRect(
-        paylineBand.x + 2,
-        paylineBand.y + 2,
-        paylineBand.width - 4,
-        paylineBand.height - 4,
+        paylineBand.x + 3,
+        paylineBand.y + 3,
+        paylineBand.width - 6,
+        paylineBand.height - 6,
         28
       )
       .stroke({
-        color: 0xffb322,
-        alpha: reveal * 0.74,
-        width: 5
+        color: 0xfff0a8,
+        alpha: reveal * (0.78 + this.state.pulse * 0.12),
+        width: 4
+      })
+      .roundRect(
+        paylineBand.x + 8,
+        paylineBand.y + 12,
+        paylineBand.width - 16,
+        paylineBand.height - 24,
+        24
+      )
+      .fill({
+        color: 0xffffff,
+        alpha: reveal * 0.28 * pulse
       })
       .roundRect(
         paylineBand.x + railInset,
-        paylineBand.y + 9,
+        paylineBand.y + 8,
         paylineBand.width - railInset * 2,
-        16,
+        13,
         8
       )
       .fill({
         color: 0xffffff,
-        alpha: reveal * 0.16 * pulse
+        alpha: reveal * 0.38 * pulse
       })
       .roundRect(
         paylineBand.x + railInset,
-        paylineBand.y + paylineBand.height - 25,
+        paylineBand.y + paylineBand.height - 22,
         paylineBand.width - railInset * 2,
-        16,
+        13,
         8
       )
       .fill({
-        color: 0xffc23a,
-        alpha: reveal * 0.13
+        color: 0x8f3b00,
+        alpha: reveal * 0.26
       })
       .moveTo(paylineBand.x + 18, centerY)
       .lineTo(paylineBand.x + paylineBand.width - 18, centerY)
       .stroke({
-        color: 0xfff2b1,
-        alpha: reveal * (0.34 + this.state.pulse * 0.14),
-        width: 3
+        color: 0xffffff,
+        alpha: reveal * (0.58 + this.state.pulse * 0.22),
+        width: 4
       });
   }
 
@@ -300,15 +333,15 @@ export class WinLineView {
     }
 
     this.cometLayer
-      .circle(point.x, point.y, 15)
+      .circle(point.x, point.y, 22)
       .fill({
         color: 0xffbd36,
-        alpha: alpha * 0.16
+        alpha: alpha * 0.24
       })
-      .circle(point.x, point.y, 6)
+      .circle(point.x, point.y, 10)
       .fill({
         color: 0xffffff,
-        alpha: alpha * 0.5
+        alpha: alpha * 0.58
       })
       .circle(point.x, point.y, 2.5)
       .fill({
@@ -355,8 +388,8 @@ export class WinLineView {
 function createPaylineBand(layout: SlotLayout["reels"]): RectLayout {
   const first = layout.cells[0];
   const last = layout.cells[2];
-  const bandHeight = Math.min(118, first.height / 3 + 8);
-  const sideBleed = Math.min(28, first.width * 0.16);
+  const bandHeight = Math.min(126, first.height / 3 + 16);
+  const sideBleed = Math.min(34, first.width * 0.2);
 
   return {
     x: first.x - sideBleed,

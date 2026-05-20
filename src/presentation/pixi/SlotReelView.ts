@@ -14,8 +14,9 @@ type ReelTile = {
 };
 
 export class SlotReelView {
-  public readonly container = new Container();
-  private readonly chromeLayer = new Container();
+  public readonly chromeContainer = new Container();
+  public readonly symbolContainer = new Container();
+  public readonly overlayContainer = new Container();
   private readonly chromeBackground = new Graphics();
   private readonly chromeInnerShade = new Graphics();
   private readonly chromeCenterSheen = new Graphics();
@@ -47,8 +48,9 @@ export class SlotReelView {
       symbol: null
     }));
 
-    this.container.label = "slotReel";
-    this.chromeLayer.label = "slotReel/chrome";
+    this.chromeContainer.label = "slotReel/chrome";
+    this.symbolContainer.label = "slotReel/symbolContainer";
+    this.overlayContainer.label = "slotReel/overlay";
     this.symbolLayer.label = "slotReel/symbols";
     this.maskShape.label = "slotReel/mask";
     this.maskShape.alpha = 0;
@@ -57,21 +59,17 @@ export class SlotReelView {
       ...this.tiles.map((tile) => tile.display.container)
     );
     this.symbolLayer.mask = this.maskShape;
-    this.chromeLayer.addChild(
+    this.chromeContainer.addChild(
       this.chromeBackground,
       this.chromeCenterSheen,
       this.chromeInnerShade,
       this.chromePaylineGlow
     );
+    this.symbolContainer.addChild(this.symbolLayer, this.maskShape);
+    this.overlayContainer.addChild(this.curvatureLayer);
     this.curvatureLayer.addChild(
       this.curvatureSideShade,
       this.curvatureCenterGlow
-    );
-    this.container.addChild(
-      this.chromeLayer,
-      this.symbolLayer,
-      this.maskShape,
-      this.curvatureLayer
     );
   }
 
@@ -87,7 +85,9 @@ export class SlotReelView {
     const isNewLayout = this.hasLayoutChanged(layout);
 
     this.layout = layout;
-    this.container.position.set(layout.x, layout.y);
+    this.chromeContainer.position.set(layout.x, layout.y);
+    this.symbolContainer.position.set(layout.x, layout.y);
+    this.overlayContainer.position.set(layout.x, layout.y);
     this.symbolStep = layout.height / 3;
     this.symbolLayout = this.createSymbolLayout(layout);
 
