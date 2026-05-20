@@ -59,8 +59,26 @@ jobs:
           }
           trap cleanup EXIT
 
+          fetch() {
+            local url="$1"
+            local output="$2"
+
+            for attempt in {1..10}; do
+              if curl --fail --silent --show-error "$url" --output "$output"; then
+                return 0
+              fi
+
+              if [ "$attempt" -eq 10 ]; then
+                echo "Failed to fetch ${url}."
+                return 1
+              fi
+
+              sleep 1
+            done
+          }
+
           for attempt in {1..30}; do
-            if curl --fail --silent --show-error http://127.0.0.1:8080/ --output /tmp/index.html; then
+            if fetch http://127.0.0.1:8080/ /tmp/index.html; then
               break
             fi
 
@@ -72,20 +90,21 @@ jobs:
             sleep 1
           done
 
-          grep --quiet "Pixi Slot Game" /tmp/index.html
+          grep --quiet "Lucky Reels" /tmp/index.html
 
           main_bundle="$(grep --only-matching --extended-regexp 'assets/main\.[^"]+\.js' /tmp/index.html | head --lines 1)"
           test -n "$main_bundle"
 
-          curl --fail --silent --show-error "http://127.0.0.1:8080/${main_bundle}" --output /tmp/main.js
-          curl --fail --silent --show-error http://127.0.0.1:8080/assets/background.svg --output /tmp/background.svg
-          curl --fail --silent --show-error http://127.0.0.1:8080/assets/atlases/slot-symbols.json --output /tmp/slot-symbols.json
-          curl --fail --silent --show-error http://127.0.0.1:8080/assets/atlases/slot-symbols.png --output /tmp/slot-symbols.png
-          curl --fail --silent --show-error http://127.0.0.1:8080/assets/atlases/slot-machine.json --output /tmp/slot-machine.json
-          curl --fail --silent --show-error http://127.0.0.1:8080/assets/atlases/slot-machine.png --output /tmp/slot-machine.png
-          curl --fail --silent --show-error http://127.0.0.1:8080/assets/audio/music/crystal_cave_theme_loop.mp3 --output /tmp/background-loop.mp3
-          curl --fail --silent --show-error http://127.0.0.1:8080/assets/audio/sfx/ui_click.ogg --output /tmp/ui-click.ogg
-          curl --fail --silent --show-error http://127.0.0.1:8080/assets/audio/sfx/win_level.ogg --output /tmp/win-level.ogg
-          curl --fail --silent --show-error http://127.0.0.1:8080/assets/spine/spineboy-pro.skel --output /tmp/spineboy-pro.skel
-          curl --fail --silent --show-error http://127.0.0.1:8080/assets/spine/spineboy-pma.atlas --output /tmp/spineboy-pma.atlas
-          curl --fail --silent --show-error http://127.0.0.1:8080/assets/spine/spineboy-pma.png --output /tmp/spineboy-pma.png
+          fetch "http://127.0.0.1:8080/${main_bundle}" /tmp/main.js
+          fetch http://127.0.0.1:8080/favicon.png /tmp/favicon.png
+          fetch http://127.0.0.1:8080/assets/background.svg /tmp/background.svg
+          fetch http://127.0.0.1:8080/assets/atlases/slot-symbols.json /tmp/slot-symbols.json
+          fetch http://127.0.0.1:8080/assets/atlases/slot-symbols.png /tmp/slot-symbols.png
+          fetch http://127.0.0.1:8080/assets/atlases/slot-machine.json /tmp/slot-machine.json
+          fetch http://127.0.0.1:8080/assets/atlases/slot-machine.png /tmp/slot-machine.png
+          fetch http://127.0.0.1:8080/assets/audio/music/crystal_cave_theme_loop.mp3 /tmp/background-loop.mp3
+          fetch http://127.0.0.1:8080/assets/audio/sfx/ui_click.ogg /tmp/ui-click.ogg
+          fetch http://127.0.0.1:8080/assets/audio/sfx/win_level.ogg /tmp/win-level.ogg
+          fetch http://127.0.0.1:8080/assets/spine/spineboy-pro.skel /tmp/spineboy-pro.skel
+          fetch http://127.0.0.1:8080/assets/spine/spineboy-pma.atlas /tmp/spineboy-pma.atlas
+          fetch http://127.0.0.1:8080/assets/spine/spineboy-pma.png /tmp/spineboy-pma.png
