@@ -95,6 +95,17 @@ available on my current local machine. The workflow builds the image, starts the
 nginx container, and smoke-tests that the playable HTML, JS bundle, atlases,
 background, audio, and Spine assets are served successfully.
 
+## GitHub Pages
+
+The `Deploy GitHub Pages` workflow builds the production bundle and publishes
+the `dist` folder through GitHub Pages. The expected public URL is:
+
+```text
+https://maksnikulnikov.github.io/slot-game/
+```
+
+The workflow can also be started manually from the GitHub Actions tab.
+
 ## Review Notes
 
 - Time spent: approximately 8 hours.
