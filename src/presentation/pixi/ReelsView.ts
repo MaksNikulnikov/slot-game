@@ -1,6 +1,7 @@
 import { Container } from "pixi.js";
 import type { Texture } from "pixi.js";
 
+import type { WinningLine } from "../../core/slot/SpinResult";
 import type { SlotSymbol } from "../../core/slot/Symbol";
 import type { SlotSymbols } from "../../core/slot/Symbol";
 import type { SlotLayout } from "../layout/SlotLayout";
@@ -68,7 +69,7 @@ export class ReelsView {
     layout: SlotLayout["reels"],
     symbols: SlotSymbols,
     isSpinning: boolean,
-    isWin: boolean
+    winningLines: readonly WinningLine[]
   ): void {
     const [firstCell, secondCell, thirdCell] = layout.cells;
     const [firstSymbol, secondSymbol, thirdSymbol] = symbols;
@@ -76,7 +77,7 @@ export class ReelsView {
     this.reelViews[0].render(firstCell, firstSymbol, isSpinning);
     this.reelViews[1].render(secondCell, secondSymbol, isSpinning);
     this.reelViews[2].render(thirdCell, thirdSymbol, isSpinning);
-    this.winLineView.render(layout, isWin);
+    this.winLineView.render(layout, winningLines.length > 0);
   }
 
   public getReelViews(): readonly [

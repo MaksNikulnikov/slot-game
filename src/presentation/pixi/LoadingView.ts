@@ -2,7 +2,7 @@ import { Container, Graphics, Text } from "pixi.js";
 
 import type { SlotViewport } from "../layout/SlotLayout";
 
-export class LoadingScreen {
+export class LoadingView {
   public readonly container = new Container();
   private readonly background = new Graphics();
   private readonly title = new Text({
@@ -27,7 +27,7 @@ export class LoadingScreen {
   private readonly barFill = new Graphics();
 
   public constructor() {
-    this.container.label = "loadingScreen";
+    this.container.label = "loadingView";
     this.title.anchor.set(0.5);
     this.percent.anchor.set(0.5);
     this.container.addChild(
@@ -66,9 +66,5 @@ export class LoadingScreen {
     this.title.position.set(viewport.width / 2, viewport.height / 2 - 22);
     this.percent.text = `${Math.round(normalizedProgress * 100)}%`;
     this.percent.position.set(viewport.width / 2, barY + 42);
-  }
-
-  public destroy(): void {
-    this.container.destroy({ children: true });
   }
 }

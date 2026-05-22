@@ -4,16 +4,35 @@ import type { SpinServer } from "../server/SpinServer";
 import { SlotMachine } from "./SlotMachine";
 
 describe("SlotMachine", () => {
-  it("returns the server symbols with the evaluated outcome", async () => {
+  it("returns the server result without evaluating the outcome locally", async () => {
     const server: SpinServer = {
       spin: async () => ({
-        symbols: ["lemon", "lemon", "lemon"]
+        matrix: [["lemon", "cherry", "lemon"]],
+        winningLines: [
+          {
+            cells: [
+              { row: 0, column: 0 },
+              { row: 0, column: 1 },
+              { row: 0, column: 2 }
+            ]
+          }
+        ],
+        isWin: true
       })
     };
     const machine = new SlotMachine(server);
 
     await expect(machine.spin()).resolves.toEqual({
-      symbols: ["lemon", "lemon", "lemon"],
+      matrix: [["lemon", "cherry", "lemon"]],
+      winningLines: [
+        {
+          cells: [
+            { row: 0, column: 0 },
+            { row: 0, column: 1 },
+            { row: 0, column: 2 }
+          ]
+        }
+      ],
       isWin: true
     });
   });

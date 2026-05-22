@@ -67,7 +67,7 @@ export function createSlotLayout(): SlotLayout {
       width: 178,
       height: 260
     },
-    outcomeBanner: {
+    resultBanner: {
       x: 425,
       y: 537,
       width: 430,

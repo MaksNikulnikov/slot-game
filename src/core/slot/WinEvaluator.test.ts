@@ -3,15 +3,25 @@ import { describe, expect, it } from "vitest";
 import { WinEvaluator } from "./WinEvaluator";
 
 describe("WinEvaluator", () => {
-  it("marks three equal symbols as a win", () => {
+  it("returns the server payline cells for three equal symbols", () => {
     const evaluator = new WinEvaluator();
 
-    expect(evaluator.isWinningLine(["seven", "seven", "seven"])).toBe(true);
+    expect(evaluator.getWinningLines([["seven", "seven", "seven"]])).toEqual([
+      {
+        cells: [
+          { row: 0, column: 0 },
+          { row: 0, column: 1 },
+          { row: 0, column: 2 }
+        ]
+      }
+    ]);
   });
 
-  it("marks mixed symbols as a loss", () => {
+  it("returns no winning lines for mixed symbols", () => {
     const evaluator = new WinEvaluator();
 
-    expect(evaluator.isWinningLine(["seven", "cherry", "seven"])).toBe(false);
+    expect(evaluator.getWinningLines([["seven", "cherry", "seven"]])).toEqual(
+      []
+    );
   });
 });

@@ -28,5 +28,5 @@ export type SlotLayout = {
   spinButton: RectLayout;
   muteButton: RectLayout;
   character: RectLayout;
-  outcomeBanner: RectLayout;
+  resultBanner: RectLayout;
 };

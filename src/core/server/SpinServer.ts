@@ -1,8 +1,6 @@
-import type { SlotSymbols } from "../slot/Symbol";
+import type { SpinResult } from "../slot/SpinResult";
 
-export type SpinResponse = {
-  symbols: SlotSymbols;
-};
+export type SpinResponse = SpinResult;
 
 export type SpinServer = {
   spin(): Promise<SpinResponse>;

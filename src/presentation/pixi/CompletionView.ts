@@ -1,34 +1,30 @@
 import { Container, Text } from "pixi.js";
 
-import type { SpinOutcome } from "../../core/slot/SpinOutcome";
-import type { SlotSymbols } from "../../core/slot/Symbol";
+import { getVisibleSymbols } from "../../core/slot/SpinResult";
+import type { SpinResult } from "../../core/slot/SpinResult";
 import type { LoadedGameAssets } from "../assets/GameAssetLoader";
 import type { SlotLayout } from "../layout/SlotLayout";
 import { gameText } from "../text/gameText";
 import { BackgroundView } from "./BackgroundView";
-import { OutcomeBannerView } from "./OutcomeBannerView";
 import { MuteButtonView } from "./MuteButtonView";
 import { ReelsFrameView } from "./ReelsFrameView";
 import { ReelsShadowView } from "./ReelsShadowView";
 import { ReelsView } from "./ReelsView";
-import type { SlotReelView } from "./SlotReelView";
 import { SpineCharacterView } from "./SpineCharacterView";
 import { SpinButtonView } from "./SpinButtonView";
 
-export type MainSceneState = {
-  symbols: SlotSymbols;
-  isSpinning: boolean;
+export type CompletionViewState = {
+  result: SpinResult;
   isMuted: boolean;
-  outcome: SpinOutcome | null;
 };
 
-export type MainSceneOptions = {
+export type CompletionViewOptions = {
   assets: LoadedGameAssets;
-  onToggleSound(): void;
   onSpin(): void;
+  onToggleSound(): void;
 };
 
-export class MainScene {
+export class CompletionView {
   public readonly container = new Container();
   private readonly assets: LoadedGameAssets;
   private readonly backgroundView = new BackgroundView();
@@ -41,15 +37,23 @@ export class MainScene {
       fontWeight: "700"
     }
   });
+  private readonly resultLabel = new Text({
+    text: "",
+    style: {
+      fill: "#f8e7b0",
+      fontFamily: "Trebuchet MS, Segoe UI, sans-serif",
+      fontSize: 42,
+      fontWeight: "700"
+    }
+  });
+  private readonly characterView: SpineCharacterView;
   private readonly reelsFrameView: ReelsFrameView;
   private readonly reelsView: ReelsView;
   private readonly reelsShadowView = new ReelsShadowView();
   private readonly muteButtonView: MuteButtonView;
   private readonly spinButtonView: SpinButtonView;
-  private readonly outcomeBannerView = new OutcomeBannerView();
-  private readonly characterView: SpineCharacterView;
 
-  public constructor(options: MainSceneOptions) {
+  public constructor(options: CompletionViewOptions) {
     this.assets = options.assets;
     this.characterView = new SpineCharacterView(options.assets.spineCharacter);
     this.reelsFrameView = new ReelsFrameView(
@@ -63,9 +67,9 @@ export class MainScene {
       onTap: options.onSpin
     });
 
-    this.container.label = "mainScene";
+    this.container.label = "completionView";
     this.title.anchor.set(0.5);
-    this.title.label = "title";
+    this.resultLabel.anchor.set(0.5);
     this.container.addChild(
       this.backgroundView.container,
       this.title,
@@ -73,46 +77,38 @@ export class MainScene {
       this.reelsView.container,
       this.reelsShadowView.container,
       this.reelsFrameView.container,
-      this.outcomeBannerView.container,
+      this.resultLabel,
       this.muteButtonView.container,
       this.spinButtonView.container
     );
   }
 
-  public render(layout: SlotLayout, state: MainSceneState): void {
+  public render(layout: SlotLayout, state: CompletionViewState): void {
     this.backgroundView.render(layout, this.assets.backgroundTexture);
-    this.renderTitle(layout);
-    this.characterView.render(layout.character, this.getCharacterMood(state));
+    this.title.position.set(layout.title.x, layout.title.y);
+    this.characterView.render(
+      layout.character,
+      state.result.isWin ? "win" : "lose"
+    );
     this.reelsView.render(
       layout.reels,
-      state.symbols,
-      state.isSpinning,
-      state.outcome?.isWin === true
+      getVisibleSymbols(state.result.matrix),
+      false,
+      state.result.winningLines
     );
     this.reelsShadowView.render(layout.reels);
     this.reelsFrameView.render(layout.reels);
-    this.outcomeBannerView.render(layout.outcomeBanner, state.outcome);
+    this.renderResultLabel(layout, state.result);
     this.muteButtonView.render(layout.muteButton, state.isMuted);
-    this.spinButtonView.render(layout.spinButton, !state.isSpinning);
+    this.spinButtonView.render(layout.spinButton, true);
   }
 
-  public getReelViews(): readonly [
-    SlotReelView,
-    SlotReelView,
-    SlotReelView
-  ] {
-    return this.reelsView.getReelViews();
-  }
-
-  private renderTitle(layout: SlotLayout): void {
-    this.title.position.set(layout.title.x, layout.title.y);
-  }
-
-  private getCharacterMood(state: MainSceneState): "idle" | "win" | "lose" {
-    if (state.outcome === null) {
-      return "idle";
-    }
-
-    return state.outcome.isWin ? "win" : "lose";
+  private renderResultLabel(layout: SlotLayout, result: SpinResult): void {
+    this.resultLabel.text = result.isWin ? gameText.win : gameText.lose;
+    this.resultLabel.style.fill = result.isWin ? "#f8e7b0" : "#9fb4c7";
+    this.resultLabel.position.set(
+      layout.resultBanner.x + layout.resultBanner.width / 2,
+      layout.resultBanner.y + layout.resultBanner.height / 2
+    );
   }
 }

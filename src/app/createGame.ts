@@ -1,11 +1,13 @@
 import { MockSpinServer } from "../core/server/MockSpinServer";
 import { SlotMachine } from "../core/slot/SlotMachine";
+import type { SlotMatrix } from "../core/slot/Symbol";
 import { GameAssetLoader } from "../presentation/assets/GameAssetLoader";
 import { gameAssets } from "../presentation/assets/gameAssets";
 import { AudioController } from "../presentation/audio/AudioController";
 import { createSlotLayout } from "../presentation/layout/createSlotLayout";
-import { PixiSlotGame } from "../presentation/pixi/PixiSlotGame";
-import type { SlotGameSession } from "../presentation/SlotGameSession";
+import { PixiGameRenderer } from "../presentation/pixi/PixiGameRenderer";
+import { SlotGameApplication } from "./SlotGameApplication";
+import type { SlotGameSession } from "./SlotGameSession";
 
 export async function createGame(): Promise<void> {
   const rootElement = document.querySelector<HTMLDivElement>("#app");
@@ -18,19 +20,23 @@ export async function createGame(): Promise<void> {
   const session: SlotGameSession = {
     spin: () => slotMachine.spin()
   };
-  const game = new PixiSlotGame(rootElement, {
+  const initialMatrix: SlotMatrix = [["cherry", "lemon", "seven"]];
+  const renderer = new PixiGameRenderer(rootElement, {
     assetLoader: new GameAssetLoader({
       assets: gameAssets,
       baseUrl: ""
     }),
+    createLayout: createSlotLayout
+  });
+  const game = new SlotGameApplication({
     audio: new AudioController({
       assets: gameAssets.audio,
       baseUrl: ""
     }),
-    createLayout: createSlotLayout,
-    initialSymbols: ["cherry", "lemon", "seven"],
+    initialMatrix,
+    renderer,
     session
   });
 
-  await game.initialize();
+  await game.start();
 }

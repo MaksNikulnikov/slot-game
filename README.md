@@ -6,8 +6,9 @@ A small HTML5 slot game built with Pixi.js, TypeScript, Webpack, GSAP, and Spine
 
 - Preload screen with a real asset-loading progress bar.
 - Main slot scene with background image, reels frame, three reels, three symbols, and spin button.
-- Mock server spin response with randomized symbols.
-- Win detection for three equal symbols.
+- Completion scene that shows the server result after the reels settle.
+- Mock server spin response with a symbol matrix, winning lines, and win state.
+- Client slot session treats the server result as authoritative.
 - GSAP reel spin and staggered settle animation with masked reel strips.
 - Spine character that switches visual states for idle, win, and lose outcomes.
 - Audio-file background loop, win sound, UI click, and mute toggle.
@@ -40,17 +41,19 @@ The project keeps the game rules away from Pixi and browser APIs.
 ```text
 src/
   app/                 composition root
-  core/                slot model, win evaluation, mock server contracts
+  core/                slot model, state machine, mock server contracts
   presentation/
     animation/         GSAP animation adapters
     assets/            asset manifest and Pixi asset loader
     audio/             Web Audio controller
     layout/            screen layout data
-    pixi/              Pixi views and scene orchestration
+    pixi/              Pixi renderer adapter and views
     text/              UI copy
 ```
 
-The Pixi layer calls the slot through `SlotGameSession`. Core code does not import Pixi, GSAP, Spine, DOM, or audio APIs.
+The app layer owns scene transitions and calls the slot through
+`SlotGameSession`. Core code does not import Pixi, GSAP, Spine, DOM, or audio
+APIs.
 
 ## Assets
 

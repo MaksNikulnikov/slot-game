@@ -1,19 +1,10 @@
 import type { SpinServer } from "../server/SpinServer";
-import type { SpinOutcome } from "./SpinOutcome";
-import { WinEvaluator } from "./WinEvaluator";
+import type { SpinResult } from "./SpinResult";
 
 export class SlotMachine {
-  public constructor(
-    private readonly spinServer: SpinServer,
-    private readonly winEvaluator = new WinEvaluator()
-  ) {}
+  public constructor(private readonly spinServer: SpinServer) {}
 
-  public async spin(): Promise<SpinOutcome> {
-    const response = await this.spinServer.spin();
-
-    return {
-      symbols: response.symbols,
-      isWin: this.winEvaluator.isWinningLine(response.symbols)
-    };
+  public spin(): Promise<SpinResult> {
+    return this.spinServer.spin();
   }
 }

@@ -1,7 +1,22 @@
-import type { SlotSymbols } from "./Symbol";
+import type { WinningLine } from "./SpinResult";
+import type { SlotMatrix } from "./Symbol";
 
 export class WinEvaluator {
-  public isWinningLine(symbols: SlotSymbols): boolean {
-    return symbols[0] === symbols[1] && symbols[1] === symbols[2];
+  public getWinningLines(matrix: SlotMatrix): readonly WinningLine[] {
+    const payline = matrix[0];
+
+    if (payline[0] !== payline[1] || payline[1] !== payline[2]) {
+      return [];
+    }
+
+    return [
+      {
+        cells: [
+          { row: 0, column: 0 },
+          { row: 0, column: 1 },
+          { row: 0, column: 2 }
+        ]
+      }
+    ];
   }
 }

@@ -13,7 +13,34 @@ describe("MockSpinServer", () => {
     await vi.advanceTimersByTimeAsync(350);
 
     await expect(responsePromise).resolves.toEqual({
-      symbols: ["cherry", "lemon", "seven"]
+      matrix: [["cherry", "lemon", "seven"]],
+      winningLines: [],
+      isWin: false
+    });
+
+    vi.useRealTimers();
+  });
+
+  it("includes server-owned winning information", async () => {
+    vi.useFakeTimers();
+
+    const server = new MockSpinServer(() => 0.9);
+    const responsePromise = server.spin();
+
+    await vi.advanceTimersByTimeAsync(350);
+
+    await expect(responsePromise).resolves.toEqual({
+      matrix: [["seven", "seven", "seven"]],
+      winningLines: [
+        {
+          cells: [
+            { row: 0, column: 0 },
+            { row: 0, column: 1 },
+            { row: 0, column: 2 }
+          ]
+        }
+      ],
+      isWin: true
     });
 
     vi.useRealTimers();
